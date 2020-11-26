@@ -1,0 +1,128 @@
+package closure
+
+import (
+	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/PuerkitoBio/goquery"
+	"golang.org/x/net/html"
+)
+
+const (
+	closureSiteURL    = "https://www.cameroncounty.us/spacex/"
+	closureDateLayout = "Jan 2, 2006"
+	closureLocation   = "America/Chicago"
+	closureTimeLayout = "3:04 pm"
+)
+
+func Get() ([]*Closure, error) {
+	document, err := scrape(closureSiteURL)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to scrape Cameron County SpaceX page: %w", err)
+	}
+
+	closures, err := document.getClosures()
+	if err != nil {
+		return nil, fmt.Errorf("Failed to get closures: %w", err)
+	}
+
+	return closures, nil
+}
+
+func (d *doc) getClosures() ([]*Closure, error) {
+	var closures []*Closure
+
+	location, err := time.LoadLocation(closureLocation)
+	if err != nil {
+		return nil, err
+	}
+
+	rows := d.Find("table tbody > tr") // no .Each function callback in order to return errors
+
+	for _, row := range rows.Nodes {
+
+		sel := &goquery.Selection{
+			Nodes: []*html.Node{row},
+		}
+
+		cells := sel.Find("td")
+		if cells.Length() != 4 {
+			return nil, fmt.Errorf("table format changed: row does not have 4 cells: cell count: %d", cells.Length())
+		}
+
+		dateString := cells.Get(1).FirstChild.Data
+		date, err := time.Parse(closureDateLayout, dateString)
+		if err != nil {
+			return nil, fmt.Errorf("date format changed from 'Jan 2, 2006' to %s", cells.Get(1).FirstChild.Data)
+		}
+
+		timeString := cells.Get(2).FirstChild.Data
+		startTime, endTime, err := parseTimeRange(timeString)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse time range: %s", err)
+		}
+
+		startDate := time.Date(date.Year(), date.Month(), date.Day(), startTime.Hour(), startTime.Minute(), 0, 0, location)
+		endDate := time.Date(date.Year(), date.Month(), date.Day(), endTime.Hour(), endTime.Minute(), 0, 0, location)
+
+		closures = append(closures,
+			&Closure{
+				ClosureType: cells.Get(0).FirstChild.Data,
+				DateString:  dateString,
+				TimeString:  timeString,
+				Start:       startDate,
+				End:         endDate,
+				Status:      cells.Get(3).FirstChild.Data,
+			},
+		)
+	}
+
+	return closures, nil
+}
+
+// timeRange format: "9:00 am to 9:00 pm"
+func parseTimeRange(timeRange string) (*time.Time, *time.Time, error) {
+
+	times := strings.Split(timeRange, "to")
+
+	if len(times) != 2 {
+		return nil, nil, fmt.Errorf("Date range format has changed from '9:00am to 9:00pm' to %s", timeRange)
+	}
+
+	start, err := time.Parse(closureTimeLayout, strings.TrimSpace(times[0]))
+	if err != nil {
+		return nil, nil, err
+	}
+	end, err := time.Parse(closureTimeLayout, strings.TrimSpace(times[1]))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &start, &end, nil
+
+}
+
+// Scrape Cameron County SpaceX page for road Closures
+func scrape(url string) (*doc, error) {
+
+	client := &http.Client{Timeout: time.Second * 10}
+
+	res, err := client.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != 200 {
+		return nil, fmt.Errorf("status code error: %d %s", res.StatusCode, res.Status)
+	}
+
+	// Load the HTML document
+	document, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return (*doc)(document), nil
+}
