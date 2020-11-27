@@ -11,6 +11,8 @@ closures related to SpaceX Starship testing][cameron-county-spacex].
 
 ### Environment
 
+Required env vars for the bot to execute:
+
 ```sh
 TWITTER_CONSUMER_KEY
 TWITTER_CONSUMER_SECRET

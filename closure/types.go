@@ -16,6 +16,7 @@ type Closure struct {
 	Start       time.Time
 	End         time.Time
 	Status      string
+	Expires     int64
 }
 
 func (c Closure) String() string {
