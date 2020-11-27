@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/nickshine/boca-chica-bot/closure"
+	"github.com/nickshine/boca-chica-bot/internal/db"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
@@ -50,4 +51,6 @@ func main() {
 	for _, c := range cls {
 		fmt.Print(c)
 	}
+
+	db.Info()
 }

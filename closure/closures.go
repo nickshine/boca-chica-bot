@@ -11,14 +11,14 @@ import (
 )
 
 const (
-	closureSiteURL    = "https://www.cameroncounty.us/spacex/"
-	closureDateLayout = "Jan 2, 2006"
-	closureLocation   = "America/Chicago"
-	closureTimeLayout = "3:04 pm"
+	siteURL         = "https://www.cameroncounty.us/spacex/"
+	dateLayout      = "Jan 2, 2006"
+	closureLocation = "America/Chicago"
+	timeLayout      = "3:04 pm"
 )
 
 func Get() ([]*Closure, error) {
-	document, err := scrape(closureSiteURL)
+	document, err := scrape(siteURL)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to scrape Cameron County SpaceX page: %w", err)
 	}
@@ -52,13 +52,15 @@ func (d *doc) getClosures() ([]*Closure, error) {
 			return nil, fmt.Errorf("table format changed: row does not have 4 cells: cell count: %d", cells.Length())
 		}
 
-		dateString := cells.Get(1).FirstChild.Data
-		date, err := time.Parse(closureDateLayout, dateString)
+		dateString := strings.TrimSpace(cells.Get(1).FirstChild.Data)
+		date, err := time.Parse(dateLayout, dateString)
 		if err != nil {
 			return nil, fmt.Errorf("date format changed from 'Jan 2, 2006' to %s", cells.Get(1).FirstChild.Data)
 		}
 
-		timeString := cells.Get(2).FirstChild.Data
+		// reset dateString to formated 'Jan 2, 2006' for primary key consistency
+		dateString = date.Format(dateLayout)
+		timeString := strings.TrimSpace(cells.Get(2).FirstChild.Data)
 		startTime, endTime, err := parseTimeRange(timeString)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse time range: %s", err)
@@ -70,8 +72,8 @@ func (d *doc) getClosures() ([]*Closure, error) {
 		closures = append(closures,
 			&Closure{
 				ClosureType: cells.Get(0).FirstChild.Data,
-				DateString:  dateString,
-				TimeString:  timeString,
+				Date:        dateString,
+				Time:        timeString,
 				Start:       startDate,
 				End:         endDate,
 				Status:      cells.Get(3).FirstChild.Data,
@@ -91,11 +93,11 @@ func parseTimeRange(timeRange string) (*time.Time, *time.Time, error) {
 		return nil, nil, fmt.Errorf("Date range format has changed from '9:00am to 9:00pm' to %s", timeRange)
 	}
 
-	start, err := time.Parse(closureTimeLayout, strings.TrimSpace(times[0]))
+	start, err := time.Parse(timeLayout, strings.TrimSpace(times[0]))
 	if err != nil {
 		return nil, nil, err
 	}
-	end, err := time.Parse(closureTimeLayout, strings.TrimSpace(times[1]))
+	end, err := time.Parse(timeLayout, strings.TrimSpace(times[1]))
 	if err != nil {
 		return nil, nil, err
 	}
