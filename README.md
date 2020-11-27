@@ -5,15 +5,19 @@ closures related to SpaceX Starship testing][cameron-county-spacex].
 
 [![Twitter](https://img.shields.io/twitter/follow/BocaChicaBot?style=social)][@bocachicabot]
 
+---
+
 ## Development
 
-To test this functionality out on a different Twitter account, these env vars are necessary:
+### Environment
 
 ```sh
 TWITTER_CONSUMER_KEY
 TWITTER_CONSUMER_SECRET
 TWITTER_ACCESS_TOKEN
 TWITTER_ACCESS_SECRET
+
+AWS_REGION=us-east-1
 ```
 
 See the [Twitter API Docs] for more info on [authentication][twitter-api-auth].
