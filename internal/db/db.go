@@ -76,12 +76,7 @@ func buildPutInput(c *closure.Closure) *dynamodb.PutItemInput {
 	return input
 }
 
-func Put(c *closure.Closure) {
-
-	if time.Now().Unix() > c.Expires {
-		// don't bother adding expired closures to table since the TTL will remove them anyways
-		return
-	}
+func Put(c *closure.Closure) error {
 
 	input := buildPutInput(c)
 
@@ -92,33 +87,36 @@ func Put(c *closure.Closure) {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
 			case dynamodb.ErrCodeConditionalCheckFailedException:
-				fmt.Println(dynamodb.ErrCodeConditionalCheckFailedException, aerr.Error())
-			case dynamodb.ErrCodeProvisionedThroughputExceededException:
-				fmt.Println(dynamodb.ErrCodeProvisionedThroughputExceededException, aerr.Error())
-			case dynamodb.ErrCodeResourceNotFoundException:
-				fmt.Println(dynamodb.ErrCodeResourceNotFoundException, aerr.Error())
-			case dynamodb.ErrCodeItemCollectionSizeLimitExceededException:
-				fmt.Println(dynamodb.ErrCodeItemCollectionSizeLimitExceededException, aerr.Error())
-			case dynamodb.ErrCodeTransactionConflictException:
-				fmt.Println(dynamodb.ErrCodeTransactionConflictException, aerr.Error())
-			case dynamodb.ErrCodeRequestLimitExceeded:
-				fmt.Println(dynamodb.ErrCodeRequestLimitExceeded, aerr.Error())
-			case dynamodb.ErrCodeInternalServerError:
-				fmt.Println(dynamodb.ErrCodeInternalServerError, aerr.Error())
+				// closure exists and has not been modified
+				return NewErrItemUnchanged()
+				// fmt.Println(dynamodb.ErrCodeConditionalCheckFailedException, aerr.Error())
+			// case dynamodb.ErrCodeProvisionedThroughputExceededException:
+			// 	fmt.Println(dynamodb.ErrCodeProvisionedThroughputExceededException, aerr.Error())
+			// case dynamodb.ErrCodeResourceNotFoundException:
+			// 	fmt.Println(dynamodb.ErrCodeResourceNotFoundException, aerr.Error())
+			// case dynamodb.ErrCodeItemCollectionSizeLimitExceededException:
+			// 	fmt.Println(dynamodb.ErrCodeItemCollectionSizeLimitExceededException, aerr.Error())
+			// case dynamodb.ErrCodeTransactionConflictException:
+			// 	fmt.Println(dynamodb.ErrCodeTransactionConflictException, aerr.Error())
+			// case dynamodb.ErrCodeRequestLimitExceeded:
+			// 	fmt.Println(dynamodb.ErrCodeRequestLimitExceeded, aerr.Error())
+			// case dynamodb.ErrCodeInternalServerError:
+			// 	fmt.Println(dynamodb.ErrCodeInternalServerError, aerr.Error())
 			default:
-				fmt.Println(aerr.Error())
+				return fmt.Errorf("Put item failure: %v", aerr.Error())
+				// fmt.Println(aerr.Error())
 
 			}
 		} else {
-			fmt.Println(err.Error())
+			return fmt.Errorf("Unknown put item failure: %v", err.Error())
 		}
-		return
 	}
 
 	// changed := res.Attributes
 	// fmt.Printf("\nchanged: %+v\n", changed)
 
 	fmt.Println(res)
+	return nil
 
 }
 

@@ -1,6 +1,10 @@
 package main
 
 import (
+	"fmt"
+	"os"
+	"time"
+
 	"github.com/nickshine/boca-chica-bot/closure"
 	"github.com/nickshine/boca-chica-bot/internal/db"
 
@@ -9,10 +13,18 @@ import (
 
 var log *zap.SugaredLogger
 
-func main() {
-	logger, _ := zap.NewProduction()
+func init() {
+	var logger *zap.Logger
+	if _, ok := os.LookupEnv("DEBUG"); ok {
+		logger, _ = zap.NewDevelopment()
+	} else {
+		logger, _ = zap.NewProduction()
+	}
 	defer logger.Sync()
 	log = logger.Sugar()
+}
+
+func main() {
 
 	/*
 		consumerKey := os.Getenv("TWITTER_CONSUMER_KEY")
@@ -46,7 +58,18 @@ func main() {
 	}
 
 	for _, c := range cls {
-		db.Put(c)
+		// don't bother putting expired closures in db as the TTL will remove them anyways
+		if time.Now().Unix() < c.Expires {
+			err := db.Put(c)
+			if err != nil {
+				switch err.(type) {
+				case *db.ErrItemUnchanged:
+					fmt.Println(err.Error())
+				default:
+					fmt.Println("unknown error")
+				}
+			}
+		}
 	}
 
 	// db.Info()
