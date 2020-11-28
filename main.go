@@ -3,45 +3,54 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/nickshine/boca-chica-bot/closure"
 	"github.com/nickshine/boca-chica-bot/internal/db"
 
-	"github.com/dghubble/go-twitter/twitter"
-	"github.com/dghubble/oauth1"
 	"go.uber.org/zap"
 )
 
 var log *zap.SugaredLogger
 
-func main() {
-	logger, _ := zap.NewProduction()
+func init() {
+	var logger *zap.Logger
+	if _, ok := os.LookupEnv("DEBUG"); ok {
+		logger, _ = zap.NewDevelopment()
+	} else {
+		logger, _ = zap.NewProduction()
+	}
 	defer logger.Sync()
 	log = logger.Sugar()
+}
 
-	consumerKey := os.Getenv("TWITTER_CONSUMER_KEY")
-	consumerSecret := os.Getenv("TWITTER_CONSUMER_SECRET")
-	accessToken := os.Getenv("TWITTER_ACCESS_TOKEN")
-	accessSecret := os.Getenv("TWITTER_ACCESS_SECRET")
+func main() {
 
-	if consumerKey == "" || consumerSecret == "" || accessToken == "" || accessSecret == "" {
-		log.Fatal("Consumer Key/secret and Access token/secret required")
-	}
+	/*
+		consumerKey := os.Getenv("TWITTER_CONSUMER_KEY")
+		consumerSecret := os.Getenv("TWITTER_CONSUMER_SECRET")
+		accessToken := os.Getenv("TWITTER_ACCESS_TOKEN")
+		accessSecret := os.Getenv("TWITTER_ACCESS_SECRET")
 
-	config := oauth1.NewConfig(consumerKey, consumerSecret)
-	token := oauth1.NewToken(accessToken, accessSecret)
+		if consumerKey == "" || consumerSecret == "" || accessToken == "" || accessSecret == "" {
+			log.Fatal("Consumer Key/secret and Access token/secret required")
+		}
 
-	httpClient := config.Client(oauth1.NoContext, token)
+		config := oauth1.NewConfig(consumerKey, consumerSecret)
+		token := oauth1.NewToken(accessToken, accessSecret)
 
-	client := twitter.NewClient(httpClient)
+		httpClient := config.Client(oauth1.NoContext, token)
 
-	verifyParams := &twitter.AccountVerifyParams{
-		SkipStatus:   twitter.Bool(true),
-		IncludeEmail: twitter.Bool(true),
-	}
+		client := twitter.NewClient(httpClient)
 
-	user, _, _ := client.Accounts.VerifyCredentials(verifyParams)
-	fmt.Printf("User's Account:\n%+v\n", user)
+		verifyParams := &twitter.AccountVerifyParams{
+			SkipStatus:   twitter.Bool(true),
+			IncludeEmail: twitter.Bool(true),
+		}
+
+		user, _, _ := client.Accounts.VerifyCredentials(verifyParams)
+		fmt.Printf("User's Account:\n%+v\n", user)
+	*/
 
 	cls, err := closure.Get()
 	if err != nil {
@@ -49,8 +58,28 @@ func main() {
 	}
 
 	for _, c := range cls {
-		fmt.Print(c)
+		// don't bother putting expired closures in db as the TTL will remove them anyways
+		if time.Now().Unix() < c.Expires {
+			existingClosure, err := db.Put(c)
+			if err != nil {
+				switch err.(type) {
+				case *db.ErrItemUnchanged:
+					log.Debugf("%s - Closure: %s", err.Error(), c)
+				default:
+					log.Errorf("%s - Closure: %s", err.Error(), c)
+				}
+			} else if existingClosure != nil {
+				// if a closure was present in db, but something changed (e.g. status changed from
+				// "Scheduled" to "Cancelled")
+				fmt.Printf("\nClosure status change!\nPrevious Closure:\n\t%s\nNew Closure:\n\t%s\n\n", existingClosure, c)
+			} else {
+				// existingClosure is nil, meaning closure was newly added to db
+				// need to add to Tweet update here "New Closure posted!"
+				fmt.Printf("New Closure Posted:\n%s\n", c)
+			}
+		}
 	}
 
-	db.Info()
+	// db.Info()
+
 }

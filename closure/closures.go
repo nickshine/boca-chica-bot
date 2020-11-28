@@ -52,6 +52,7 @@ func (d *doc) getClosures() ([]*Closure, error) {
 			return nil, fmt.Errorf("table format changed: row does not have 4 cells: cell count: %d", cells.Length())
 		}
 
+		closureType := strings.TrimSpace(cells.Get(0).FirstChild.Data)
 		dateString := strings.TrimSpace(cells.Get(1).FirstChild.Data)
 		date, err := time.Parse(dateLayout, dateString)
 		if err != nil {
@@ -69,14 +70,18 @@ func (d *doc) getClosures() ([]*Closure, error) {
 		startDate := time.Date(date.Year(), date.Month(), date.Day(), startTime.Hour(), startTime.Minute(), 0, 0, location)
 		endDate := time.Date(date.Year(), date.Month(), date.Day(), endTime.Hour(), endTime.Minute(), 0, 0, location)
 
+		status := strings.TrimSpace(cells.Get(3).FirstChild.Data)
+		expires := endDate.Unix()
+
 		closures = append(closures,
 			&Closure{
-				ClosureType: cells.Get(0).FirstChild.Data,
+				ClosureType: closureType,
 				Date:        dateString,
 				Time:        timeString,
 				Start:       startDate,
 				End:         endDate,
-				Status:      cells.Get(3).FirstChild.Data,
+				Status:      status,
+				Expires:     expires,
 			},
 		)
 	}
