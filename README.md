@@ -1,5 +1,9 @@
 # boca-chica-bot
 
+<p align="center">
+<img width="600" src="assets/boca-chica-bot.jpg">
+</p>
+
 >I am a Twitter Bot that tweets status updates to the [Cameron County beach and road
 closures related to SpaceX Starship testing][cameron-county-spacex].
 

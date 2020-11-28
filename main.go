@@ -60,14 +60,22 @@ func main() {
 	for _, c := range cls {
 		// don't bother putting expired closures in db as the TTL will remove them anyways
 		if time.Now().Unix() < c.Expires {
-			err := db.Put(c)
+			existingClosure, err := db.Put(c)
 			if err != nil {
 				switch err.(type) {
 				case *db.ErrItemUnchanged:
-					fmt.Println(err.Error())
+					log.Debugf("%s - Closure: %s", err.Error(), c)
 				default:
-					fmt.Println("unknown error")
+					log.Errorf("%s - Closure: %s", err.Error(), c)
 				}
+			} else if existingClosure != nil {
+				// if a closure was present in db, but something changed (e.g. status changed from
+				// "Scheduled" to "Cancelled")
+				fmt.Printf("\nClosure status change!\nPrevious Closure:\n\t%s\nNew Closure:\n\t%s\n\n", existingClosure, c)
+			} else {
+				// existingClosure is nil, meaning closure was newly added to db
+				// need to add to Tweet update here "New Closure posted!"
+				fmt.Printf("New Closure Posted:\n%s\n", c)
 			}
 		}
 	}

@@ -20,5 +20,5 @@ type Closure struct {
 }
 
 func (c Closure) String() string {
-	return fmt.Sprintf("%s\tStart: %v\tEnd: %v\tStatus: %s\n", c.ClosureType, c.Start, c.End, c.Status)
+	return fmt.Sprintf("%s - %v to %v - %s\n", c.ClosureType, c.Start, c.End, c.Status)
 }

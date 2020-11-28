@@ -2,12 +2,14 @@ package db
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/prometheus/common/log"
 
 	"github.com/nickshine/boca-chica-bot/closure"
 )
@@ -76,11 +78,9 @@ func buildPutInput(c *closure.Closure) *dynamodb.PutItemInput {
 	return input
 }
 
-func Put(c *closure.Closure) error {
+func Put(c *closure.Closure) (*closure.Closure, error) {
 
 	input := buildPutInput(c)
-
-	// check if closure already exists. If so, figure out if anything has changed
 
 	res, err := svc.PutItem(input)
 	if err != nil {
@@ -88,7 +88,7 @@ func Put(c *closure.Closure) error {
 			switch aerr.Code() {
 			case dynamodb.ErrCodeConditionalCheckFailedException:
 				// closure exists and has not been modified
-				return NewErrItemUnchanged()
+				return nil, NewErrItemUnchanged()
 				// fmt.Println(dynamodb.ErrCodeConditionalCheckFailedException, aerr.Error())
 			// case dynamodb.ErrCodeProvisionedThroughputExceededException:
 			// 	fmt.Println(dynamodb.ErrCodeProvisionedThroughputExceededException, aerr.Error())
@@ -103,21 +103,56 @@ func Put(c *closure.Closure) error {
 			// case dynamodb.ErrCodeInternalServerError:
 			// 	fmt.Println(dynamodb.ErrCodeInternalServerError, aerr.Error())
 			default:
-				return fmt.Errorf("Put item failure: %v", aerr.Error())
-				// fmt.Println(aerr.Error())
-
+				return nil, fmt.Errorf("Put item failure: %v", aerr.Error())
 			}
-		} else {
-			return fmt.Errorf("Unknown put item failure: %v", err.Error())
 		}
+
+		return nil, fmt.Errorf("Unknown put item failure: %v", err.Error())
 	}
 
-	// changed := res.Attributes
-	// fmt.Printf("\nchanged: %+v\n", changed)
+	// convert back to closure and return
+	fmt.Printf("\nresponse: %+v\n", res)
 
-	fmt.Println(res)
-	return nil
+	return buildClosure(res.Attributes), nil
 
+}
+
+func buildClosure(attributes map[string]*dynamodb.AttributeValue) *closure.Closure {
+	if attributes == nil {
+		return nil
+	}
+
+	ct := aws.StringValue(attributes["ClosureType"].S)
+	date := aws.StringValue(attributes["Date"].S)
+	timeRange := aws.StringValue(attributes["Time"].S)
+	startString := aws.StringValue(attributes["Start"].S)
+	start, err := time.Parse(time.RFC3339, startString)
+	if err != nil {
+		log.Errorf("problem parsing Start attribute: %v", err)
+	}
+	endString := aws.StringValue(attributes["End"].S)
+	end, err := time.Parse(time.RFC3339, endString)
+	if err != nil {
+		log.Errorf("problem parsing End attribute: %v", err)
+	}
+	status := aws.StringValue(attributes["Status"].S)
+	expiresString := aws.StringValue(attributes["Expires"].N)
+	expires, err := strconv.ParseInt(expiresString, 10, 64)
+	if err != nil {
+		log.Errorf("problem parsing expires string: %v", err)
+	}
+
+	c := &closure.Closure{
+		ClosureType: ct,
+		Date:        date,
+		Time:        timeRange,
+		Start:       start,
+		End:         end,
+		Status:      status,
+		Expires:     expires,
+	}
+
+	return c
 }
 
 func Info() {
