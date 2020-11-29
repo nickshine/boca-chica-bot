@@ -9,6 +9,14 @@ Starship testing][cameron-county-spacex] in Boca Chica, TX.
 
 [![Twitter](https://img.shields.io/twitter/follow/BocaChicaBot?style=social)][@bocachicabot]
 
+## How I Work
+
+I periodically pull the published road and beach closures from the [Cameron County SpaceX
+page][cameron-county-spacex] to see if there are any changes or additions, then tweet them out as
+[@BocaChicaBot].
+
+I'm written in [Go] and run [serverless] in [AWS] using [AWS Lambda], [DynamoDB], and [EventBridge].
+
 ---
 
 ## Development
@@ -41,11 +49,15 @@ DEBUG=true
 * [Twitter API Docs]
 * [Twitter API authentication][twitter-api-auth]
 
+[aws]:https://aws.amazon.com/
 [aws lambda]:https://aws.amazon.com/lambda/
 [aws-param-store]:https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html
 [aws-sdk-go]:https://docs.aws.amazon.com/sdk-for-go/
-[dynamodb]:https://aws.amazon.com/dynamodb/
-[@BocaChicaBot]:https://twitter.com/bocachicabot
 [cameron-county-spacex]:https://www.cameroncounty.us/spacex/
+[dynamodb]:https://aws.amazon.com/dynamodb/
+[EventBridge]:https://aws.amazon.com/eventbridge/
+[go]:https://golang.org/
+[serverless]:https://aws.amazon.com/serverless/
 [twitter api docs]:https://developer.twitter.com/en/docs/twitter-api
 [twitter-api-auth]:https://developer.twitter.com/en/docs/authentication/overview
+[@BocaChicaBot]:https://twitter.com/bocachicabot
