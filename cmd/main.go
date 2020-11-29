@@ -22,7 +22,7 @@ func init() {
 	} else {
 		logger, _ = zap.NewProduction()
 	}
-	defer func() { _ = logger.Sync() }()
+	defer logger.Sync() // nolint:errcheck
 	log = logger.Sugar()
 }
 
@@ -31,7 +31,6 @@ func main() {
 }
 
 func handler() {
-
 	// consumerKey := os.Getenv("TWITTER_CONSUMER_KEY")
 	// consumerSecret := os.Getenv("TWITTER_CONSUMER_SECRET")
 	// accessToken := os.Getenv("TWITTER_ACCESS_TOKEN")
@@ -73,7 +72,8 @@ func handler() {
 					log.Errorf("%s - Closure: %s", err.Error(), c)
 				}
 			} else if existingClosure != nil {
-				// if there was an existing closure in db and an attribute changed (e.g. status changed from "Scheduled" to "Cancelled")
+				// if there was an existing closure in db and an attribute changed (e.g. status
+				// changed from "Scheduled" to "Cancelled")
 				fmt.Printf("\nClosure status change!\nPrevious Closure:\n\t%s\nNew Closure:\n\t%s\n\n", existingClosure, c)
 			} else {
 				// existingClosure is nil (meaning new addition to db)

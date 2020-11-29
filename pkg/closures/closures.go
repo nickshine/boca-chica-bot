@@ -1,3 +1,5 @@
+// Package closures retrieves beach and road closures related to SpaceX Starship testing in Boca
+// Chica, TX.
 package closures
 
 import (
@@ -17,6 +19,7 @@ const (
 	timeLayout      = "3:04 pm"
 )
 
+// Get pulls the current beach/road closures from https://www.cameroncounty.us/spacex/.
 func Get() ([]*Closure, error) {
 	document, err := scrape(siteURL)
 	if err != nil {
@@ -91,7 +94,6 @@ func (d *doc) getClosures() ([]*Closure, error) {
 
 // timeRange format: "9:00 am to 9:00 pm"
 func parseTimeRange(timeRange string) (*time.Time, *time.Time, error) {
-
 	times := strings.Split(timeRange, "to")
 
 	if len(times) != 2 {
@@ -108,19 +110,17 @@ func parseTimeRange(timeRange string) (*time.Time, *time.Time, error) {
 	}
 
 	return &start, &end, nil
-
 }
 
 // Scrape Cameron County SpaceX page for road Closures
 func scrape(url string) (*doc, error) {
-
 	client := &http.Client{Timeout: time.Second * 10}
 
 	res, err := client.Get(url)
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer res.Body.Close() //nolint:errcheck
 	if res.StatusCode != 200 {
 		return nil, fmt.Errorf("status code error: %d %s", res.StatusCode, res.Status)
 	}

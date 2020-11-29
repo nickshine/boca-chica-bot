@@ -1,14 +1,26 @@
 run:
   # timeout for analysis, e.g. 30s, 5m, default is 1m
   timeout: 5m
-linters-settings:
-  golint:
-    min-confidence: 0
+# linters-settings:
+#   golint:
+#     min-confidence: 0
 
 linters:
   enable:
+    - dogsled
+    - dupl
+    - goconst
+    - gofmt
+    - gofumpt
     - golint
+    - gocyclo
+    - interfacer
+    - lll
     - maligned
     - misspell
-    - gofmt
+    - nakedret
+    - unparam
 
+
+issues:
+  exclude-use-default: false

@@ -9,6 +9,7 @@ import (
 
 type doc goquery.Document
 
+// Closure represents a beach and/or road closure notice from the Cameron County SpaceX site.
 type Closure struct {
 	ClosureType string
 	Date        string

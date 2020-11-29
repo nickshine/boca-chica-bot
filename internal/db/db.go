@@ -28,7 +28,6 @@ func init() {
 // Closures are automatically deleted from the db table when their 'Expires' attribute becomes older
 // than the current time (See DynamoDB Managed TTL).
 func Put(c *closures.Closure) (*closures.Closure, error) {
-
 	input := buildPutInput(c)
 
 	res, err := svc.PutItem(input)
