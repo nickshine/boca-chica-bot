@@ -1,7 +1,7 @@
 # boca-chica-bot
 
 <p align="center">
-<img width="700" src="assets/boca-chica-bot.jpg">
+<img width="800" src="assets/boca-chica-bot.jpg">
 </p>
 
 >I am a Twitter Bot that tweets status updates to [beach and road closures related to SpaceX
