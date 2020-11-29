@@ -16,7 +16,8 @@ var log *zap.SugaredLogger
 
 func init() {
 	var logger *zap.Logger
-	if _, ok := os.LookupEnv("DEBUG"); ok {
+	debug := os.Getenv("DEBUG")
+	if debug != "false" && debug != "" {
 		logger, _ = zap.NewDevelopment()
 	} else {
 		logger, _ = zap.NewProduction()
