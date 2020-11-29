@@ -52,34 +52,31 @@ func main() {
 		fmt.Printf("User's Account:\n%+v\n", user)
 	*/
 
-	cls, err := closure.Get()
+	closures, err := closure.Get()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	for _, c := range cls {
+	for _, c := range closures {
 		// don't bother putting expired closures in db as the TTL will remove them anyways
 		if time.Now().Unix() < c.Expires {
 			existingClosure, err := db.Put(c)
 			if err != nil {
 				switch err.(type) {
-				case *db.ErrItemUnchanged:
+				case *db.ItemUnchangedError:
 					log.Debugf("%s - Closure: %s", err.Error(), c)
 				default:
 					log.Errorf("%s - Closure: %s", err.Error(), c)
 				}
 			} else if existingClosure != nil {
-				// if a closure was present in db, but something changed (e.g. status changed from
-				// "Scheduled" to "Cancelled")
+				// if there was an existing closure in db and an attribute changed (e.g. status changed from "Scheduled" to "Cancelled")
 				fmt.Printf("\nClosure status change!\nPrevious Closure:\n\t%s\nNew Closure:\n\t%s\n\n", existingClosure, c)
 			} else {
-				// existingClosure is nil, meaning closure was newly added to db
+				// existingClosure is nil (meaning new addition to db)
 				// need to add to Tweet update here "New Closure posted!"
 				fmt.Printf("New Closure Posted:\n%s\n", c)
 			}
 		}
 	}
-
-	// db.Info()
 
 }

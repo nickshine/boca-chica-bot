@@ -1,15 +1,18 @@
 package db
 
-type ErrItemUnchanged struct {
+// ItemUnchangedError is an implementation of the error interface used to signify items in the db
+// exist and have no changes.
+type ItemUnchangedError struct {
 	message string
 }
 
-func NewErrItemUnchanged() *ErrItemUnchanged {
-	return &ErrItemUnchanged{
+// NewItemUnchangedError returns a new instance of ItemUnchangedError.
+func NewItemUnchangedError() *ItemUnchangedError {
+	return &ItemUnchangedError{
 		message: "Item exists and is unchanged",
 	}
 }
 
-func (e *ErrItemUnchanged) Error() string {
+func (e *ItemUnchangedError) Error() string {
 	return e.message
 }

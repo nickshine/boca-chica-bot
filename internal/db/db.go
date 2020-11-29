@@ -2,14 +2,10 @@ package db
 
 import (
 	"fmt"
-	"strconv"
-	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/prometheus/common/log"
 
 	"github.com/nickshine/boca-chica-bot/closure"
 )
@@ -23,61 +19,14 @@ func init() {
 	svc = dynamodb.New(sess)
 }
 
-func buildPutInput(c *closure.Closure) *dynamodb.PutItemInput {
-	input := &dynamodb.PutItemInput{
-		Item: map[string]*dynamodb.AttributeValue{
-			"ClosureType": {
-				S: aws.String(c.ClosureType),
-			},
-			"Date": {
-				S: aws.String(c.Date),
-			},
-			"Time": {
-				S: aws.String(c.Time),
-			},
-			"Start": {
-				S: aws.String(c.Start.Format(time.RFC3339)),
-			},
-			"End": {
-				S: aws.String(c.End.Format(time.RFC3339)),
-			},
-			"Status": {
-				S: aws.String(c.Status),
-			},
-			"Expires": {
-				N: aws.String(fmt.Sprint(c.Expires)),
-			},
-		},
-		ReturnConsumedCapacity: aws.String("TOTAL"),
-		TableName:              aws.String(tablename),
-		ReturnValues:           aws.String("ALL_OLD"),
-		// Only overwrite existing if something has changed
-		// ConditionExpression:    aws.String("attribute_not_exists(#D) AND attribute_not_exists(#T) OR #S <> :status OR ClosureType <> :type"),
-		ConditionExpression: aws.String("ClosureType <> :type OR #Status <> :status OR #Start <> :start OR #End <> :end"),
-		ExpressionAttributeNames: map[string]*string{
-			"#Status": aws.String("Status"),
-			"#Start":  aws.String("Start"),
-			"#End":    aws.String("End"),
-		},
-		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":end": {
-				S: aws.String(c.End.Format(time.RFC3339)),
-			},
-			":start": {
-				S: aws.String(c.Start.Format(time.RFC3339)),
-			},
-			":status": {
-				S: aws.String(c.Status),
-			},
-			":type": {
-				S: aws.String(c.ClosureType),
-			},
-		},
-	}
-
-	return input
-}
-
+// Put will insert a road and/or beach closure notice in to the db.
+//
+// If the closure already exists in the db but something has changed (e.g. 'Status' has changed from
+// 'Scheduled' to 'Cancelled'), then the new closure overwrites existing. The existing closure is
+// returned in this case, otherwise nil.
+//
+// Closures are automatically deleted from the db table when their 'Expires' attribute becomes older
+// than the current time (See DynamoDB Managed TTL).
 func Put(c *closure.Closure) (*closure.Closure, error) {
 
 	input := buildPutInput(c)
@@ -87,21 +36,7 @@ func Put(c *closure.Closure) (*closure.Closure, error) {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
 			case dynamodb.ErrCodeConditionalCheckFailedException:
-				// closure exists and has not been modified
-				return nil, NewErrItemUnchanged()
-				// fmt.Println(dynamodb.ErrCodeConditionalCheckFailedException, aerr.Error())
-			// case dynamodb.ErrCodeProvisionedThroughputExceededException:
-			// 	fmt.Println(dynamodb.ErrCodeProvisionedThroughputExceededException, aerr.Error())
-			// case dynamodb.ErrCodeResourceNotFoundException:
-			// 	fmt.Println(dynamodb.ErrCodeResourceNotFoundException, aerr.Error())
-			// case dynamodb.ErrCodeItemCollectionSizeLimitExceededException:
-			// 	fmt.Println(dynamodb.ErrCodeItemCollectionSizeLimitExceededException, aerr.Error())
-			// case dynamodb.ErrCodeTransactionConflictException:
-			// 	fmt.Println(dynamodb.ErrCodeTransactionConflictException, aerr.Error())
-			// case dynamodb.ErrCodeRequestLimitExceeded:
-			// 	fmt.Println(dynamodb.ErrCodeRequestLimitExceeded, aerr.Error())
-			// case dynamodb.ErrCodeInternalServerError:
-			// 	fmt.Println(dynamodb.ErrCodeInternalServerError, aerr.Error())
+				return nil, NewItemUnchangedError()
 			default:
 				return nil, fmt.Errorf("Put item failure: %v", aerr.Error())
 			}
@@ -110,51 +45,18 @@ func Put(c *closure.Closure) (*closure.Closure, error) {
 		return nil, fmt.Errorf("Unknown put item failure: %v", err.Error())
 	}
 
-	// convert back to closure and return
-	fmt.Printf("\nresponse: %+v\n", res)
+	// res.Attributes will contain the existing closure if an attribute has changed.
+	// See the ConditionalExpression on PutItem input.
+	// New closures added to db will return nil.
+	closure, err := buildClosure(res.Attributes)
+	if err != nil {
+		return nil, err
+	}
 
-	return buildClosure(res.Attributes), nil
-
+	return closure, nil
 }
 
-func buildClosure(attributes map[string]*dynamodb.AttributeValue) *closure.Closure {
-	if attributes == nil {
-		return nil
-	}
-
-	ct := aws.StringValue(attributes["ClosureType"].S)
-	date := aws.StringValue(attributes["Date"].S)
-	timeRange := aws.StringValue(attributes["Time"].S)
-	startString := aws.StringValue(attributes["Start"].S)
-	start, err := time.Parse(time.RFC3339, startString)
-	if err != nil {
-		log.Errorf("problem parsing Start attribute: %v", err)
-	}
-	endString := aws.StringValue(attributes["End"].S)
-	end, err := time.Parse(time.RFC3339, endString)
-	if err != nil {
-		log.Errorf("problem parsing End attribute: %v", err)
-	}
-	status := aws.StringValue(attributes["Status"].S)
-	expiresString := aws.StringValue(attributes["Expires"].N)
-	expires, err := strconv.ParseInt(expiresString, 10, 64)
-	if err != nil {
-		log.Errorf("problem parsing expires string: %v", err)
-	}
-
-	c := &closure.Closure{
-		ClosureType: ct,
-		Date:        date,
-		Time:        timeRange,
-		Start:       start,
-		End:         end,
-		Status:      status,
-		Expires:     expires,
-	}
-
-	return c
-}
-
+/*
 func Info() {
 	input := &dynamodb.DescribeTableInput{
 		TableName: aws.String(tablename),
@@ -178,5 +80,5 @@ func Info() {
 	}
 
 	fmt.Println(res)
-
 }
+*/
