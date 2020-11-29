@@ -1,4 +1,4 @@
-package closure
+package closures
 
 import (
 	"fmt"
@@ -20,12 +20,12 @@ const (
 func Get() ([]*Closure, error) {
 	document, err := scrape(siteURL)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to scrape Cameron County SpaceX page: %w", err)
+		return nil, fmt.Errorf("failed to scrape Cameron County SpaceX page: %w", err)
 	}
 
 	closures, err := document.getClosures()
 	if err != nil {
-		return nil, fmt.Errorf("Failed to get closures: %w", err)
+		return nil, fmt.Errorf("failed to get closures: %w", err)
 	}
 
 	return closures, nil
@@ -95,7 +95,7 @@ func parseTimeRange(timeRange string) (*time.Time, *time.Time, error) {
 	times := strings.Split(timeRange, "to")
 
 	if len(times) != 2 {
-		return nil, nil, fmt.Errorf("Date range format has changed from '9:00am to 9:00pm' to %s", timeRange)
+		return nil, nil, fmt.Errorf("date range format has changed from '9:00am to 9:00pm' to %s", timeRange)
 	}
 
 	start, err := time.Parse(timeLayout, strings.TrimSpace(times[0]))

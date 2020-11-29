@@ -2,14 +2,14 @@ BINARY=boca-chica-bot
 BUILD_FLAGS=-ldflags="-s -w"
 
 lint:
-	golangci-lint run -v --timeout 5m
+	golangci-lint run -v
 
 build:
-	GOOS=linux GOARCH=amd64 go build -o bin/$(BINARY) ./lambda
+	GOOS=linux GOARCH=amd64 go build -o bin/$(BINARY) ./cmd
 
 zip:
 	@echo "Zipping for release"
-	@cd bin && zip lambda.zip $(BINARY); cd -
+	zip -jm bin/lambda.zip bin/$(BINARY)
 
 package: clean build zip
 

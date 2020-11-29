@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 
-	"github.com/nickshine/boca-chica-bot/pkg/closure"
+	"github.com/nickshine/boca-chica-bot/pkg/closures"
 )
 
 const tablename = "BocaChicaBot-closures"
@@ -27,7 +27,7 @@ func init() {
 //
 // Closures are automatically deleted from the db table when their 'Expires' attribute becomes older
 // than the current time (See DynamoDB Managed TTL).
-func Put(c *closure.Closure) (*closure.Closure, error) {
+func Put(c *closures.Closure) (*closures.Closure, error) {
 
 	input := buildPutInput(c)
 
@@ -38,11 +38,11 @@ func Put(c *closure.Closure) (*closure.Closure, error) {
 			case dynamodb.ErrCodeConditionalCheckFailedException:
 				return nil, NewItemUnchangedError()
 			default:
-				return nil, fmt.Errorf("Put item failure: %v", aerr.Error())
+				return nil, fmt.Errorf("put item failure: %v", aerr.Error())
 			}
 		}
 
-		return nil, fmt.Errorf("Unknown put item failure: %v", err.Error())
+		return nil, fmt.Errorf("unknown put item failure: %v", err.Error())
 	}
 
 	// res.Attributes will contain the existing closure if an attribute has changed.

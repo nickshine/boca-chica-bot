@@ -7,7 +7,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/nickshine/boca-chica-bot/internal/db"
-	"github.com/nickshine/boca-chica-bot/pkg/closure"
+	"github.com/nickshine/boca-chica-bot/pkg/closures"
 
 	"go.uber.org/zap"
 )
@@ -56,7 +56,7 @@ func handler() {
 	// user, _, _ := client.Accounts.VerifyCredentials(verifyParams)
 	// fmt.Printf("User's Account:\n%+v\n", user)
 
-	closures, err := closure.Get()
+	closures, err := closures.Get()
 	if err != nil {
 		log.Fatal(err.Error())
 	}

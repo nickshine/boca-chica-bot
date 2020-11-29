@@ -7,10 +7,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/nickshine/boca-chica-bot/pkg/closure"
+	"github.com/nickshine/boca-chica-bot/pkg/closures"
 )
 
-func buildPutInput(c *closure.Closure) *dynamodb.PutItemInput {
+func buildPutInput(c *closures.Closure) *dynamodb.PutItemInput {
 	input := &dynamodb.PutItemInput{
 		Item: map[string]*dynamodb.AttributeValue{
 			"ClosureType": {
@@ -64,7 +64,7 @@ func buildPutInput(c *closure.Closure) *dynamodb.PutItemInput {
 	return input
 }
 
-func buildClosure(attributes map[string]*dynamodb.AttributeValue) (*closure.Closure, error) {
+func buildClosure(attributes map[string]*dynamodb.AttributeValue) (*closures.Closure, error) {
 	if attributes == nil {
 		return nil, nil
 	}
@@ -89,7 +89,7 @@ func buildClosure(attributes map[string]*dynamodb.AttributeValue) (*closure.Clos
 		return nil, fmt.Errorf("problem parsing 'Expires' attribute: %v", err)
 	}
 
-	c := &closure.Closure{
+	c := &closures.Closure{
 		ClosureType: ct,
 		Date:        date,
 		Time:        timeRange,
