@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/nickshine/boca-chica-bot/closure"
 	"github.com/nickshine/boca-chica-bot/internal/db"
 
@@ -25,32 +26,34 @@ func init() {
 }
 
 func main() {
+	lambda.Start(handler)
+}
 
-	/*
-		consumerKey := os.Getenv("TWITTER_CONSUMER_KEY")
-		consumerSecret := os.Getenv("TWITTER_CONSUMER_SECRET")
-		accessToken := os.Getenv("TWITTER_ACCESS_TOKEN")
-		accessSecret := os.Getenv("TWITTER_ACCESS_SECRET")
+func handler() {
 
-		if consumerKey == "" || consumerSecret == "" || accessToken == "" || accessSecret == "" {
-			log.Fatal("Consumer Key/secret and Access token/secret required")
-		}
+	// consumerKey := os.Getenv("TWITTER_CONSUMER_KEY")
+	// consumerSecret := os.Getenv("TWITTER_CONSUMER_SECRET")
+	// accessToken := os.Getenv("TWITTER_ACCESS_TOKEN")
+	// accessSecret := os.Getenv("TWITTER_ACCESS_SECRET")
 
-		config := oauth1.NewConfig(consumerKey, consumerSecret)
-		token := oauth1.NewToken(accessToken, accessSecret)
+	// if consumerKey == "" || consumerSecret == "" || accessToken == "" || accessSecret == "" {
+	// 	log.Fatal("Consumer Key/secret and Access token/secret required")
+	// }
 
-		httpClient := config.Client(oauth1.NoContext, token)
+	// config := oauth1.NewConfig(consumerKey, consumerSecret)
+	// token := oauth1.NewToken(accessToken, accessSecret)
 
-		client := twitter.NewClient(httpClient)
+	// httpClient := config.Client(oauth1.NoContext, token)
 
-		verifyParams := &twitter.AccountVerifyParams{
-			SkipStatus:   twitter.Bool(true),
-			IncludeEmail: twitter.Bool(true),
-		}
+	// client := twitter.NewClient(httpClient)
 
-		user, _, _ := client.Accounts.VerifyCredentials(verifyParams)
-		fmt.Printf("User's Account:\n%+v\n", user)
-	*/
+	// verifyParams := &twitter.AccountVerifyParams{
+	// 	SkipStatus:   twitter.Bool(true),
+	// 	IncludeEmail: twitter.Bool(true),
+	// }
+
+	// user, _, _ := client.Accounts.VerifyCredentials(verifyParams)
+	// fmt.Printf("User's Account:\n%+v\n", user)
 
 	closures, err := closure.Get()
 	if err != nil {
@@ -78,5 +81,4 @@ func main() {
 			}
 		}
 	}
-
 }
