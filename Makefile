@@ -5,7 +5,7 @@ lint:
 	golangci-lint run -v --timeout 5m
 
 build:
-	GOOS=linux GOARCH=amd64 go build -o bin/$(BINARY)
+	GOOS=linux GOARCH=amd64 go build -o bin/$(BINARY) ./lambda
 
 zip:
 	@echo "Zipping for release"

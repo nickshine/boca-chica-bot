@@ -7,7 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/nickshine/boca-chica-bot/closure"
+	"github.com/nickshine/boca-chica-bot/pkg/closure"
 )
 
 func buildPutInput(c *closure.Closure) *dynamodb.PutItemInput {

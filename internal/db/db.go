@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 
-	"github.com/nickshine/boca-chica-bot/closure"
+	"github.com/nickshine/boca-chica-bot/pkg/closure"
 )
 
 const tablename = "BocaChicaBot-closures"

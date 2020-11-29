@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/nickshine/boca-chica-bot/closure"
 	"github.com/nickshine/boca-chica-bot/internal/db"
+	"github.com/nickshine/boca-chica-bot/pkg/closure"
 
 	"go.uber.org/zap"
 )
