@@ -21,7 +21,7 @@ func init() {
 	} else {
 		logger, _ = zap.NewProduction()
 	}
-	defer logger.Sync()
+	defer func() { _ = logger.Sync() }()
 	log = logger.Sugar()
 }
 
