@@ -1,4 +1,4 @@
-# boca-chica-bot
+# boca-chica-bot :rocket:
 
 <p align="center">
 <img width="800" src="assets/boca-chica-bot.jpg">
