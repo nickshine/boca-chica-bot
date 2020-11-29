@@ -1,10 +1,3 @@
-run:
-  # timeout for analysis, e.g. 30s, 5m, default is 1m
-  timeout: 5m
-# linters-settings:
-#   golint:
-#     min-confidence: 0
-
 linters:
   enable:
     - dogsled
@@ -20,7 +13,6 @@ linters:
     - misspell
     - nakedret
     - unparam
-
 
 issues:
   exclude-use-default: false
