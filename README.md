@@ -1,13 +1,15 @@
 # boca-chica-bot :rocket:
 
+>I am a Twitter Bot that tweets status updates to [beach and road closures related to SpaceX
+Starship testing][cameron-county-spacex] in Boca Chica, TX.
+
+[![twitter-badge]][@bocachicabot]
+
 <p align="center">
 <img width="800" src="assets/boca-chica-bot.jpg">
 </p>
 
->I am a Twitter Bot that tweets status updates to [beach and road closures related to SpaceX
-Starship testing][cameron-county-spacex] in Boca Chica, TX.
-
-[![Twitter](https://img.shields.io/twitter/follow/BocaChicaBot?style=social)][@bocachicabot]
+[![go-report-card-badge]][go-report-card]
 
 ## How I Work
 
@@ -57,7 +59,10 @@ DEBUG=true
 [dynamodb]:https://aws.amazon.com/dynamodb/
 [EventBridge]:https://aws.amazon.com/eventbridge/
 [go]:https://golang.org/
+[go-report-card]:https://goreportcard.com/report/github.com/nickshine/boca-chica-bot
+[go-report-card-badge]:https://goreportcard.com/badge/github.com/nickshine/boca-chica-bot
 [serverless]:https://aws.amazon.com/serverless/
 [twitter api docs]:https://developer.twitter.com/en/docs/twitter-api
 [twitter-api-auth]:https://developer.twitter.com/en/docs/authentication/overview
+[twitter-badge]:https://img.shields.io/twitter/follow/BocaChicaBot?style=social
 [@BocaChicaBot]:https://twitter.com/bocachicabot
