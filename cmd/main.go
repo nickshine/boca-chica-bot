@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/nickshine/boca-chica-bot/internal/db"
+	"github.com/nickshine/boca-chica-bot/internal/param"
 	"github.com/nickshine/boca-chica-bot/internal/twitter"
 	"github.com/nickshine/boca-chica-bot/pkg/closures"
 
@@ -80,19 +81,32 @@ func handleTweets(tweets []string) {
 		return
 	}
 
-	c := &twitter.Credentials{
-		ConsumerKey:    os.Getenv("TWITTER_CONSUMER_KEY"),
-		ConsumerSecret: os.Getenv("TWITTER_CONSUMER_SECRET"),
-		AccessToken:    os.Getenv("TWITTER_ACCESS_TOKEN"),
-		AccessSecret:   os.Getenv("TWITTER_ACCESS_SECRET"),
+	pClient := param.GetClient()
+	params, err := pClient.GetParams("/boca-chica-bot/prod/")
+	if err != nil {
+		log.Fatalf("error retrieving Twitter API creds from parameter store: %v", err)
 	}
+
+	c := &twitter.Credentials{
+		ConsumerKey:    params["twitter_consumer_key"],
+		ConsumerSecret: params["twitter_consumer_secret"],
+		AccessToken:    params["twitter_access_token"],
+		AccessSecret:   params["twitter_access_secret"],
+	}
+
+	// c := &twitter.Credentials{
+	// 	ConsumerKey:    os.Getenv("TWITTER_CONSUMER_KEY"),
+	// 	ConsumerSecret: os.Getenv("TWITTER_CONSUMER_SECRET"),
+	// 	AccessToken:    os.Getenv("TWITTER_ACCESS_TOKEN"),
+	// 	AccessSecret:   os.Getenv("TWITTER_ACCESS_SECRET"),
+	// }
 
 	client, err := twitter.GetClient(c)
 	if err != nil {
 		log.Errorf("error getting twitter client: %v", err)
 	}
 
-	log.Debug(client.Verify())
+	// log.Debug(client.Verify())
 
 	for _, t := range tweets {
 		log.Debugf("Tweet length: %d\n", len(t))

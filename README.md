@@ -28,10 +28,6 @@ I'm written in [Go] and run [serverless] in [AWS] using [AWS Lambda], [DynamoDB]
 Create a `.env` file with these env vars set:
 
 ```sh
-TWITTER_CONSUMER_KEY=
-TWITTER_CONSUMER_SECRET=
-TWITTER_ACCESS_TOKEN=
-TWITTER_ACCESS_SECRET=
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
 AWS_REGION=us-east-1
