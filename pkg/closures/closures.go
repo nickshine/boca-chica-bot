@@ -12,8 +12,13 @@ import (
 	"golang.org/x/net/html"
 )
 
+// CancelledStatus represents the cancelled Boca Chica Beach status display text.
+const CancelledStatus = "Closure Cancelled"
+
+// SiteURL is the website publishing the Boca Chica Beach and Road closures.
+const SiteURL = "https://www.cameroncounty.us/spacex/"
+
 const (
-	siteURL         = "https://www.cameroncounty.us/spacex/"
 	dateLayout      = "Jan 2, 2006"
 	closureLocation = "America/Chicago"
 	timeLayout      = "3:04 pm"
@@ -21,7 +26,7 @@ const (
 
 // Get pulls the current beach/road closures from https://www.cameroncounty.us/spacex/.
 func Get() ([]*Closure, error) {
-	document, err := scrape(siteURL)
+	document, err := scrape(SiteURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scrape Cameron County SpaceX page: %w", err)
 	}

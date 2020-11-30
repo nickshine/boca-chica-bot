@@ -9,7 +9,9 @@ Starship testing][cameron-county-spacex] in Boca Chica, TX.
 <img width="800" src="assets/boca-chica-bot.jpg">
 </p>
 
+![go-version-badge]
 [![go-report-card-badge]][go-report-card]
+[![pkg-go-dev-badge]][pkg-go-dev]
 
 ## How I Work
 
@@ -21,26 +23,29 @@ I'm written in [Go] and run [serverless] in [AWS] using [AWS Lambda], [DynamoDB]
 
 ---
 
-## Development
+## Local Development
 
-### Environment
-
-Required env vars for the bot to execute:
+Create a `.env` file with these env vars set:
 
 ```sh
-TWITTER_CONSUMER_KEY
-TWITTER_CONSUMER_SECRET
-TWITTER_ACCESS_TOKEN
-TWITTER_ACCESS_SECRET
-
+TWITTER_CONSUMER_KEY=
+TWITTER_CONSUMER_SECRET=
+TWITTER_ACCESS_TOKEN=
+TWITTER_ACCESS_SECRET=
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
 AWS_REGION=us-east-1
-```
-
-Set this env var for verbose logging during development:
-
-```sh
 DEBUG=true
 ```
+
+The `.env` file is leveraged in the `lambci/lambda:go1.x` Docker container used to run the lambda
+handler locally:
+
+```sh
+make run
+```
+
+---
 
 ## Reference
 
@@ -61,6 +66,9 @@ DEBUG=true
 [go]:https://golang.org/
 [go-report-card]:https://goreportcard.com/report/github.com/nickshine/boca-chica-bot
 [go-report-card-badge]:https://goreportcard.com/badge/github.com/nickshine/boca-chica-bot
+[go-version-badge]:https://img.shields.io/github/go-mod/go-version/nickshine/boca-chica-bot
+[pkg-go-dev]:https://pkg.go.dev/github.com/nickshine/boca-chica-bot
+[pkg-go-dev-badge]:https://pkg.go.dev/badge/github.com/nickshine/boca-chica-bot
 [serverless]:https://aws.amazon.com/serverless/
 [twitter api docs]:https://developer.twitter.com/en/docs/twitter-api
 [twitter-api-auth]:https://developer.twitter.com/en/docs/authentication/overview
