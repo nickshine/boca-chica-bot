@@ -36,6 +36,7 @@ AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
 AWS_REGION=us-east-1
 DEBUG=true
+DISABLE_TWEETS=true
 ```
 
 The `.env` file is leveraged in the `lambci/lambda:go1.x` Docker container used to run the lambda
