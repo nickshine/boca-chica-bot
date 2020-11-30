@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/nickshine/boca-chica-bot/internal/db"
+	"github.com/nickshine/boca-chica-bot/internal/twitter"
 	"github.com/nickshine/boca-chica-bot/pkg/closures"
 
 	"go.uber.org/zap"
@@ -31,38 +32,17 @@ func main() {
 }
 
 func handler() {
-	// consumerKey := os.Getenv("TWITTER_CONSUMER_KEY")
-	// consumerSecret := os.Getenv("TWITTER_CONSUMER_SECRET")
-	// accessToken := os.Getenv("TWITTER_ACCESS_TOKEN")
-	// accessSecret := os.Getenv("TWITTER_ACCESS_SECRET")
-
-	// if consumerKey == "" || consumerSecret == "" || accessToken == "" || accessSecret == "" {
-	// 	log.Fatal("Consumer Key/secret and Access token/secret required")
-	// }
-
-	// config := oauth1.NewConfig(consumerKey, consumerSecret)
-	// token := oauth1.NewToken(accessToken, accessSecret)
-
-	// httpClient := config.Client(oauth1.NoContext, token)
-
-	// client := twitter.NewClient(httpClient)
-
-	// verifyParams := &twitter.AccountVerifyParams{
-	// 	SkipStatus:   twitter.Bool(true),
-	// 	IncludeEmail: twitter.Bool(true),
-	// }
-
-	// user, _, _ := client.Accounts.VerifyCredentials(verifyParams)
-	// fmt.Printf("User's Account:\n%+v\n", user)
-
-	closures, err := closures.Get()
+	cls, err := closures.Get()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	for _, c := range closures {
+	var tweets []string
+
+	for _, c := range cls {
 		// don't bother putting expired closures in db as the TTL will remove them anyways
 		if time.Now().Unix() < c.Expires {
+			var tweet string
 			existingClosure, err := db.Put(c)
 			if err != nil {
 				switch err.(type) {
@@ -74,12 +54,53 @@ func handler() {
 			} else if existingClosure != nil {
 				// if there was an existing closure in db and an attribute changed (e.g. status
 				// changed from "Scheduled" to "Cancelled")
-				fmt.Printf("\nClosure status change!\nPrevious Closure:\n\t%s\nNew Closure:\n\t%s\n\n", existingClosure, c)
+				if c.Status == closures.CancelledStatus {
+					tweet = fmt.Sprintf("Boca Chica Beach closure - %s - has been cancelled.\n%s", c, closures.SiteURL)
+				} else {
+					tweet = fmt.Sprintf("Beach closure status change!\n%s - %s\n%s", c, c.Status, closures.SiteURL)
+				}
+				tweets = append(tweets, tweet)
 			} else {
 				// existingClosure is nil (meaning new addition to db)
-				// need to add to Tweet update here "New Closure posted!"
-				fmt.Printf("New Closure Posted:\n%s\n", c)
+				tweet = fmt.Sprintf("New Boca Chica Beach closure scheduled!\n%s - %s\n%s", c.ClosureType, c, closures.SiteURL)
+				tweets = append(tweets, tweet)
 			}
 		}
+	}
+
+	handleTweets(tweets)
+}
+
+func handleTweets(tweets []string) {
+	if len(tweets) == 0 {
+		return
+	}
+	if disable := os.Getenv("DISABLE_TWEETS"); disable != "" && disable != "false" {
+		log.Debug("DISABLE_TWEETS env var enabled, skipping publishing of any possible tweets.")
+		return
+	}
+
+	c := &twitter.Credentials{
+		ConsumerKey:    os.Getenv("TWITTER_CONSUMER_KEY"),
+		ConsumerSecret: os.Getenv("TWITTER_CONSUMER_SECRET"),
+		AccessToken:    os.Getenv("TWITTER_ACCESS_TOKEN"),
+		AccessSecret:   os.Getenv("TWITTER_ACCESS_SECRET"),
+	}
+
+	client, err := twitter.GetClient(c)
+	if err != nil {
+		log.Errorf("error getting twitter client: %v", err)
+	}
+
+	log.Debug(client.Verify())
+
+	for _, t := range tweets {
+		log.Debugf("Tweet length: %d\n", len(t))
+		log.Infof("Tweeting: %s\n", t)
+		createdAt, err := client.Tweet(t)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Debugf("Tweet created at %s", createdAt)
 	}
 }
