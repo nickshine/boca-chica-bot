@@ -16,6 +16,11 @@ import (
 
 var log *zap.SugaredLogger
 
+var (
+	twitterParamsPath = "/boca-chica-bot/prod/"
+	tablename         = "BocaChicaBot-closures"
+)
+
 func init() {
 	var logger *zap.Logger
 	debug := os.Getenv("DEBUG")
@@ -26,6 +31,11 @@ func init() {
 	}
 	defer logger.Sync() // nolint:errcheck
 	log = logger.Sugar()
+
+	if os.Getenv("TWITTER_ENVIRONMENT") == "test" {
+		twitterParamsPath = "/boca-chica-bot/test/"
+		tablename = "BocaChicaBot-closures-test"
+	}
 }
 
 func main() {
@@ -44,7 +54,7 @@ func handler() {
 		// don't bother putting expired closures in db as the TTL will remove them anyways
 		if time.Now().Unix() < c.Expires {
 			var tweet string
-			existingClosure, err := db.Put(c)
+			existingClosure, err := db.Put(tablename, c)
 			if err != nil {
 				switch err.(type) {
 				case *db.ItemUnchangedError:
@@ -56,14 +66,15 @@ func handler() {
 				// if there was an existing closure in db and an attribute changed (e.g. status
 				// changed from "Scheduled" to "Cancelled")
 				if c.Status == closures.CancelledStatus {
-					tweet = fmt.Sprintf("Boca Chica Beach closure - %s - has been cancelled.\n%s", c, closures.SiteURL)
+					tweet = fmt.Sprintf("Beach closure for %s - has been cancelled.\n%s\n#spacex #starship", c, closures.SiteURL)
 				} else {
-					tweet = fmt.Sprintf("Beach closure status change!\n%s - %s\n%s", c, c.Status, closures.SiteURL)
+					tweet = fmt.Sprintf("Beach closure status change:\n%s - %s\n%s\n#spacex #starship", c, c.Status, closures.SiteURL)
 				}
 				tweets = append(tweets, tweet)
 			} else {
 				// existingClosure is nil (meaning new addition to db)
-				tweet = fmt.Sprintf("New Boca Chica Beach closure scheduled!\n%s - %s\n%s", c.ClosureType, c, closures.SiteURL)
+				tweet = fmt.Sprintf("New beach closure scheduled:\n%s - %s\n%s\n#spacex #starship",
+					c.ClosureType, c, closures.SiteURL)
 				tweets = append(tweets, tweet)
 			}
 		}
@@ -82,7 +93,7 @@ func handleTweets(tweets []string) {
 	}
 
 	pClient := param.GetClient()
-	params, err := pClient.GetParams("/boca-chica-bot/prod/")
+	params, err := pClient.GetParams(twitterParamsPath)
 	if err != nil {
 		log.Fatalf("error retrieving Twitter API creds from parameter store: %v", err)
 	}

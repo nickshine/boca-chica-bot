@@ -33,7 +33,7 @@ func (c *Client) Tweet(s string) (string, error) {
 	return tweet.CreatedAt, err
 }
 
-// Verify prints user info using the provided credentials to validate they work.
+// Verify returns user info using the provided credentials to validate they work.
 func (c *Client) Verify() string {
 	verifyParams := &twitter.AccountVerifyParams{
 		SkipStatus:   twitter.Bool(true),
