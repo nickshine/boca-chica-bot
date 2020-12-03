@@ -10,7 +10,7 @@ import (
 	"github.com/nickshine/boca-chica-bot/pkg/closures"
 )
 
-func buildPutInput(c *closures.Closure) *dynamodb.PutItemInput {
+func buildPutInput(tablename string, c *closures.Closure) *dynamodb.PutItemInput {
 	input := &dynamodb.PutItemInput{
 		Item: map[string]*dynamodb.AttributeValue{
 			"ClosureType": {

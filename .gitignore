@@ -1,9 +1,14 @@
 .env
 *.test
 bin/
-
-# Dependency directories (remove the comment below to include it)
-# vendor/
-
-### Go Patch ###
+deploy/lambda/*.zip
 /vendor/
+
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json

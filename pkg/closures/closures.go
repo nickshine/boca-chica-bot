@@ -19,7 +19,7 @@ const CancelledStatus = "Closure Cancelled"
 const SiteURL = "https://www.cameroncounty.us/spacex/"
 
 const (
-	dateLayout      = "Jan 2, 2006"
+	dateLayout      = "Monday, Jan 2, 2006"
 	closureLocation = "America/Chicago"
 	timeLayout      = "3:04 pm"
 )
@@ -64,7 +64,7 @@ func (d *doc) getClosures() ([]*Closure, error) {
 		dateString := strings.TrimSpace(cells.Get(1).FirstChild.Data)
 		date, err := time.Parse(dateLayout, dateString)
 		if err != nil {
-			return nil, fmt.Errorf("date format changed from 'Jan 2, 2006' to %s", cells.Get(1).FirstChild.Data)
+			return nil, fmt.Errorf("date format changed from 'Jan 2, 2006' to '%s'", cells.Get(1).FirstChild.Data)
 		}
 
 		// reset dateString to formated 'Jan 2, 2006' for primary key consistency

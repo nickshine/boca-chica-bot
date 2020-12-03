@@ -10,8 +10,6 @@ import (
 	"github.com/nickshine/boca-chica-bot/pkg/closures"
 )
 
-const tablename = "BocaChicaBot-closures"
-
 var svc *dynamodb.DynamoDB
 
 func init() {
@@ -27,8 +25,8 @@ func init() {
 //
 // Closures are automatically deleted from the db table when their 'Expires' attribute becomes older
 // than the current time (See DynamoDB Managed TTL).
-func Put(c *closures.Closure) (*closures.Closure, error) {
-	input := buildPutInput(c)
+func Put(tablename string, c *closures.Closure) (*closures.Closure, error) {
+	input := buildPutInput(tablename, c)
 
 	res, err := svc.PutItem(input)
 	if err != nil {
@@ -56,7 +54,7 @@ func Put(c *closures.Closure) (*closures.Closure, error) {
 }
 
 /*
-func Info() {
+func Info(tablename string) {
 	input := &dynamodb.DescribeTableInput{
 		TableName: aws.String(tablename),
 	}

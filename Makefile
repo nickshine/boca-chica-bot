@@ -12,11 +12,12 @@ run: build
 
 zip:
 	@echo "Zipping for release"
-	zip -jm bin/lambda.zip bin/$(BINARY)
+	zip -j deploy/lambda/lambda.zip bin/$(BINARY)
 
 package: clean build zip
 
 clean:
 	@go clean
-	@rm -rf bin/
+	@rm -rf bin
+	@rm -f deploy/lambda/*.zip
 	@rm -f coverage.out coverage.html
