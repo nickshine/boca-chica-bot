@@ -9,5 +9,6 @@ resource "aws_cloudwatch_event_rule" "cron" {
 
 resource "aws_cloudwatch_event_target" "lambda" {
   rule = aws_cloudwatch_event_rule.cron.name
-  arn  = "arn:aws:lambda:us-east-1:401054096140:function:boca-chica-bot-test:test"
+  arn  = aws_lambda_alias.lambda.arn
+  # arn  = "arn:aws:lambda:us-east-1:401054096140:function:boca-chica-bot-test:test"
 }

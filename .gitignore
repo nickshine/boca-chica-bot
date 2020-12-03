@@ -1,6 +1,7 @@
 .env
 *.test
 bin/
+deploy/lambda/*.zip
 /vendor/
 
 **/.terraform/*

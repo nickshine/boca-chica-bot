@@ -88,7 +88,7 @@ func handleTweets(tweets []string) {
 		return
 	}
 	if disable := os.Getenv("DISABLE_TWEETS"); disable != "" && disable != "false" {
-		log.Debug("DISABLE_TWEETS env var enabled, skipping publishing of any possible tweets.")
+		log.Debugf("DISABLE_TWEETS env var enabled, skipping publishing of tweets: %v", tweets)
 		return
 	}
 
