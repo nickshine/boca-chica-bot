@@ -17,6 +17,10 @@ variable "env" {
   description = "environment"
 }
 
+variable "param_store_path" {
+  description = "Prefix for SSM Parameter Store SecureString secret names."
+}
+
 variable "tablename" {
   description = "DynamoDB table name"
 }
