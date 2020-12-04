@@ -1,9 +1,9 @@
 output "table_arn" {
-  value = module.dynamodb.arn
+  value = aws_dynamodb_table.table.arn
 }
 
 output "table_id" {
-  value = module.dynamodb.id
+  value = aws_dynamodb_table.table.id
 }
 
 output "function_arn" {

@@ -19,5 +19,5 @@ resource "aws_dynamodb_table" "table" {
     type = "S"
   }
 
-  tags = var.tags
+  tags = local.tags
 }
