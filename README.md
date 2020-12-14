@@ -1,4 +1,4 @@
-# boca-chica-bot :rocket:
+# :rocket: boca-chica-bot
 
 >I am a Twitter Bot that tweets status updates to [beach and road closures related to SpaceX
 Starship testing][cameron-county-spacex] in Boca Chica, TX.
