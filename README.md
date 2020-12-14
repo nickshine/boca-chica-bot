@@ -1,4 +1,4 @@
-# boca-chica-bot :rocket:
+# :rocket: boca-chica-bot
 
 >I am a Twitter Bot that tweets status updates to [beach and road closures related to SpaceX
 Starship testing][cameron-county-spacex] in Boca Chica, TX.
@@ -38,6 +38,15 @@ Required Environment Variables for these workspaces in Terraform Cloud:
 - `AWS_SECRET_ACCESS_KEY`
 - `TF_CLI_ARGS_plan=-var-file=workspaces/test.tfvars` (for test)
 - `TF_CLI_ARGS_plan=-var-file=workspaces/prod.tfvars` (for prod)
+
+Required Terraform Variables in Terraform Cloud:
+
+- `twitter_consumer_key`
+- `twitter_consumer_secret`
+- `twitter_access_secret`
+- `twitter_access_token`
+
+These are used to populate the Parameter Store with the required Twitter API creds.
 
 ## Local Development
 

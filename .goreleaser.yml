@@ -1,0 +1,28 @@
+before:
+  hooks:
+    - go mod download
+env:
+  - GO111MODULE=on
+builds:
+  - main: ./cmd/main.go
+    mod_timestamp: '{{ .CommitTimestamp }}'
+    flags:
+      - -trimpath
+    ldflags:
+      - '-s -w'
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+archives:
+  - format: zip
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^ci:'
+      - '^chore:'

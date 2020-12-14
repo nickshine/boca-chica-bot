@@ -1,6 +1,7 @@
 .env
 *.test
 bin/
+dist/
 deploy/lambda/*.zip
 /vendor/
 
