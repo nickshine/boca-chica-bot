@@ -39,6 +39,15 @@ Required Environment Variables for these workspaces in Terraform Cloud:
 - `TF_CLI_ARGS_plan=-var-file=workspaces/test.tfvars` (for test)
 - `TF_CLI_ARGS_plan=-var-file=workspaces/prod.tfvars` (for prod)
 
+Required Terraform Variables in Terraform Cloud:
+
+- `twitter_consumer_key`
+- `twitter_consumer_secret`
+- `twitter_access_secret`
+- `twitter_access_token`
+
+These are used to populate the Parameter Store with the required Twitter API creds.
+
 ## Local Development
 
 Create a `.env` file with these env vars set:
