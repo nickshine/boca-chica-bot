@@ -6,7 +6,7 @@ Starship testing][cameron-county-spacex] in Boca Chica, TX.
 [![twitter-badge]][@bocachicabot]
 
 <p align="center">
-<img width="800" src="assets/boca-chica-bot.jpg">
+<img width="500" src="assets/boca-chica-bot.jpg">
 </p>
 
 ![go-version-badge]
