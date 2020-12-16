@@ -18,7 +18,6 @@ builds:
       - amd64
 archives:
   - format: zip
-    name_template: "{{ .ProjectName }}_{{ .Env.NEXT_VERSION }}_{{ .Os }}_{{ .Arch }}"
 changelog:
   skip: true
 release:

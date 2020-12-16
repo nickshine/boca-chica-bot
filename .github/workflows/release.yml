@@ -14,35 +14,46 @@ jobs:
         with:
           fetch-depth: 0
           # persist-credentials: false
-      - name: Version
+      - name: Get branch name
+        run: echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
+      - name: Get Release Version
         uses: cycjimmy/semantic-release-action@v2
         id: semantic-dry-run
         with:
           semantic_version: 17
           branches: |
-            [ 'master',
-              'semantic-release'
+            [ "master",
+              "${{ env.BRANCH_NAME }}"
             ]
           dry_run: true
           extra_plugins: |
             @semantic-release/changelog
+            @semantic-release/exec
             @semantic-release/git
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ENV: $GITHUB_ENV
 
-
-
+      - name: Set Go Version
+        run: echo "GO_VERSION=$(grep "go 1." go.mod | cut -d " " -f 2)" >> $GITHUB_ENV
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.15
-      - name: Build
+          go-version: ${{ env.GO_VERSION }}
+      - name: Build Snapshot
+        if: ${{ env.NEW_RELEASE == 'false' }}
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
-          args: build --rm-dist
+          args: build --rm-dist --snapshot
+      - name: Build Release
+        if: ${{ env.NEW_RELEASE == 'true' }}
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: build --rm-dist --skip-validate --debug
         env:
-          NEXT_VERSION: ${{ steps.semantic-dry-run.outputs.new_release_version }}
+          GORELEASER_CURRENT_TAG: v${{ env.VERSION }}
         #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
