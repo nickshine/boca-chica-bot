@@ -14,6 +14,12 @@ jobs:
         with:
           fetch-depth: 0
           # persist-credentials: false
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
       - name: Get branch name
         run: echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
       - name: Get Release Version
@@ -40,34 +46,38 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ env.GO_VERSION }}
-      - name: Build Snapshot
-        if: ${{ env.NEW_RELEASE == 'false' }}
-        uses: goreleaser/goreleaser-action@v2
-        with:
-          version: latest
-          args: build --rm-dist --snapshot
+      # - name: Build Snapshot
+      #   if: ${{ env.NEW_RELEASE == 'false' }}
+      #   uses: goreleaser/goreleaser-action@v2
+      #   with:
+      #     version: latest
+      #     args: build --rm-dist --snapshot
       - name: Build Release
         if: ${{ env.NEW_RELEASE == 'true' }}
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
-          args: build --rm-dist --skip-validate --debug
+          # args: build --rm-dist --skip-validate --debug
+          args: build --rm-dist --skip-validate
         env:
           GORELEASER_CURRENT_TAG: v${{ env.VERSION }}
-        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
-      # - name: Release
-      #   uses: cycjimmy/semantic-release-action@v2
-      #   id: semantic
-      #   with:
-      #     semantic_version: 17
-      #     dry_run: true
-      #     extra_plugins: |
-      #       @semantic-release/changelog
-      #       @semantic-release/git
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release
+        uses: cycjimmy/semantic-release-action@v2
+        with:
+          semantic_version: 17
+          branches: |
+            [ "master",
+              "${{ env.BRANCH_NAME }}"
+            ]
+          dry_run: true
+          extra_plugins: |
+            @semantic-release/changelog
+            @semantic-release/exec
+            @semantic-release/git
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ENV: $GITHUB_ENV
       # - name: Echo semantic version
       #   if: steps.semantic.outputs.new_release_published == 'true'
       #   run: |
@@ -75,8 +85,6 @@ jobs:
       #     echo ${{ steps.semantic.outputs.new_release_major_version }}
       #     echo ${{ steps.semantic.outputs.new_release_minor_version }}
       #     echo ${{ steps.semantic.outputs.new_release_patch_version }}
-
-
 
       # - name: Go Report Card
       #   uses: creekorful/goreportcard-action@v1.0
