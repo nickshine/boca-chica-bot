@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - semantic-release
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -26,10 +25,10 @@ jobs:
         id: semantic-dry-run
         with:
           semantic_version: 17
-          branches: |
-            [ "master",
-              "${{ env.BRANCH_NAME }}"
-            ]
+          # branches: |
+          #   [ "master",
+          #     "${{ env.BRANCH_NAME }}"
+          #   ]
           dry_run: true
           extra_plugins: |
             @semantic-release/changelog
@@ -45,12 +44,6 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ env.GO_VERSION }}
-      # - name: Build Snapshot
-      #   if: ${{ env.NEW_RELEASE == 'false' }}
-      #   uses: goreleaser/goreleaser-action@v2
-      #   with:
-      #     version: latest
-      #     args: build --rm-dist --snapshot
       - name: Build Release
         if: ${{ env.NEW_RELEASE == 'true' }}
         uses: goreleaser/goreleaser-action@v2
@@ -64,11 +57,10 @@ jobs:
         uses: cycjimmy/semantic-release-action@v2
         with:
           semantic_version: 17
-          branches: |
-            [ "master",
-              "${{ env.BRANCH_NAME }}"
-            ]
-          dry_run: true
+          # branches: |
+          #   [ "master",
+          #     "${{ env.BRANCH_NAME }}"
+          #   ]
           extra_plugins: |
             @semantic-release/changelog
             @semantic-release/exec
