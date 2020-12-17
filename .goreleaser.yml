@@ -19,10 +19,6 @@ builds:
 archives:
   - format: zip
 changelog:
-  sort: asc
-  filters:
-    exclude:
-      - '^docs:'
-      - '^test:'
-      - '^ci:'
-      - '^chore:'
+  skip: true
+release:
+  disable: true

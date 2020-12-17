@@ -1,0 +1,18 @@
+branches:
+  - master
+plugins:
+  - "@semantic-release/commit-analyzer"
+  - "@semantic-release/release-notes-generator"
+  - - "@semantic-release/exec"
+    - analyzeCommitsCmd: "echo 'VERSION=${lastRelease.version}\nNEW_RELEASE=false' >> $GITHUB_ENV"
+      verifyReleaseCmd: "echo 'VERSION=${nextRelease.version}\nNEW_RELEASE=true' >> $GITHUB_ENV"
+  - "@semantic-release/changelog"
+  - - "@semantic-release/git"
+    - assets:
+        - CHANGELOG.md
+  - - "@semantic-release/github"
+    - assets:
+        - path: "dist/*.zip"
+        - path: "dist/*checksums.txt"
+
+
