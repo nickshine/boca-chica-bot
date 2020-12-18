@@ -14,7 +14,10 @@ import (
 	"go.uber.org/zap"
 )
 
-var log *zap.SugaredLogger
+var (
+	log      *zap.SugaredLogger
+	dbClient *db.Client
+)
 
 var (
 	twitterParamsPath = "/boca-chica-bot/prod/"
@@ -31,6 +34,8 @@ func init() {
 	}
 	defer logger.Sync() // nolint:errcheck
 	log = logger.Sugar()
+
+	dbClient = db.NewClient()
 
 	if os.Getenv("TWITTER_ENVIRONMENT") == "test" {
 		twitterParamsPath = "/boca-chica-bot/test/"
@@ -54,7 +59,7 @@ func handler() {
 		// don't bother putting expired closures in db as the TTL will remove them anyways
 		if time.Now().Unix() < c.Expires {
 			var tweet string
-			existingClosure, err := db.Put(tablename, c)
+			existingClosure, err := dbClient.Put(tablename, c)
 			if err != nil {
 				switch err.(type) {
 				case *db.ItemUnchangedError:
@@ -92,7 +97,7 @@ func handleTweets(tweets []string) {
 		return
 	}
 
-	pClient := param.GetClient()
+	pClient := param.NewClient()
 	params, err := pClient.GetParams(twitterParamsPath)
 	if err != nil {
 		log.Fatalf("error retrieving Twitter API creds from parameter store: %v", err)
