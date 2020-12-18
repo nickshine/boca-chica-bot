@@ -1,5 +1,12 @@
 package db
 
+import (
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+)
+
+// Client is a dynamodb client with some convenience receiver functions added.
+type Client dynamodb.DynamoDB
+
 // ItemUnchangedError is an implementation of the error interface used to signify items in the db
 // exist and have no changes.
 type ItemUnchangedError struct {

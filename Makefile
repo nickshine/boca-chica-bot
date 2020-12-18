@@ -18,6 +18,6 @@ package: clean build zip
 
 clean:
 	@go clean
-	@rm -rf bin
+	@rm -rf bin dist
 	@rm -f deploy/lambda/*.zip
 	@rm -f coverage.out coverage.html

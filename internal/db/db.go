@@ -10,11 +10,12 @@ import (
 	"github.com/nickshine/boca-chica-bot/pkg/closures"
 )
 
-var svc *dynamodb.DynamoDB
-
-func init() {
+// NewClient returns a new Client
+func NewClient() *Client {
 	sess := session.Must(session.NewSession())
-	svc = dynamodb.New(sess)
+	ddb := dynamodb.New(sess)
+
+	return (*Client)(ddb)
 }
 
 // Put will insert a road and/or beach closure notice in to the db.
@@ -25,10 +26,10 @@ func init() {
 //
 // Closures are automatically deleted from the db table when their 'Expires' attribute becomes older
 // than the current time (See DynamoDB Managed TTL).
-func Put(tablename string, c *closures.Closure) (*closures.Closure, error) {
+func (client *Client) Put(tablename string, c *closures.Closure) (*closures.Closure, error) {
 	input := buildPutInput(tablename, c)
 
-	res, err := svc.PutItem(input)
+	res, err := (*dynamodb.DynamoDB)(client).PutItem(input)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
@@ -52,30 +53,3 @@ func Put(tablename string, c *closures.Closure) (*closures.Closure, error) {
 
 	return closure, nil
 }
-
-/*
-func Info(tablename string) {
-	input := &dynamodb.DescribeTableInput{
-		TableName: aws.String(tablename),
-	}
-
-	res, err := svc.DescribeTable(input)
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case dynamodb.ErrCodeResourceNotFoundException:
-				fmt.Println(dynamodb.ErrCodeResourceNotFoundException, aerr.Error())
-			case dynamodb.ErrCodeInternalServerError:
-				fmt.Println(dynamodb.ErrCodeInternalServerError, aerr.Error())
-			default:
-				fmt.Println(aerr.Error())
-			}
-		} else {
-			fmt.Println(err.Error())
-		}
-		return
-	}
-
-	fmt.Println(res)
-}
-*/

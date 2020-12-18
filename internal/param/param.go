@@ -8,11 +8,11 @@ import (
 	"github.com/aws/aws-sdk-go/service/ssm"
 )
 
-// Client is an alias for ssm.SSM with some convenience receiver functions added.
+// Client is a ssm.SSM client with some convenience receiver functions added.
 type Client ssm.SSM
 
-// GetClient returns a new Client.
-func GetClient() *Client {
+// NewClient returns a new Client.
+func NewClient() *Client {
 	sess := session.Must(session.NewSession())
 	svc := ssm.New(sess)
 
