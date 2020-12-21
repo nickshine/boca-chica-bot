@@ -64,7 +64,7 @@ func (d *doc) getClosures() ([]*Closure, error) {
 		dateString := strings.TrimSpace(cells.Get(1).FirstChild.Data)
 		date, err := time.Parse(dateLayout, dateString)
 		if err != nil {
-			return nil, fmt.Errorf("date format changed from 'Jan 2, 2006' to '%s'", cells.Get(1).FirstChild.Data)
+			return nil, fmt.Errorf("date format changed from 'Monday, Jan 2, 2006' to '%s'", cells.Get(1).FirstChild.Data)
 		}
 
 		// reset dateString to formated 'Jan 2, 2006' for primary key consistency
