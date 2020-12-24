@@ -23,7 +23,6 @@ I'm written in [Go] and run [serverless] in [AWS] using [AWS Lambda], [DynamoDB]
 
 ![arch diagram](./assets/boca-chica-bot.drawio.svg)
 
-
 ---
 
 ## Deployment

@@ -4,7 +4,23 @@ before:
 env:
   - GO111MODULE=on
 builds:
-  - main: ./cmd/main.go
+  - id: "scraper"
+    main: ./cmd/scraper/main.go
+    binary: boca-chica-bot-scraper
+    mod_timestamp: '{{ .CommitTimestamp }}'
+    flags:
+      - -trimpath
+    ldflags:
+      - '-s -w'
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+  - id: "publisher"
+    main: ./cmd/publisher/main.go
+    binary: boca-chica-bot-publisher
     mod_timestamp: '{{ .CommitTimestamp }}'
     flags:
       - -trimpath
