@@ -54,6 +54,7 @@ jobs:
           GORELEASER_CURRENT_TAG: v${{ env.VERSION }}
       - name: Clear node_modules for npm ci
         run: rm -rf node_modules/
+      - run: ls -al
       - name: Release
         if: ${{ env.NEW_RELEASE == 'true' }}
         uses: cycjimmy/semantic-release-action@v2
