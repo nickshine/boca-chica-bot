@@ -61,6 +61,7 @@ jobs:
           #   [ "master",
           #     "${{ env.BRANCH_NAME }}"
           #   ]
+          dry_run: true
           extra_plugins: |
             @semantic-release/changelog
             @semantic-release/exec
