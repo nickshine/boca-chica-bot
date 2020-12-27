@@ -44,6 +44,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ env.GO_VERSION }}
+      - run: echo "Clearing node_modules/ for npm ci; rm -rf node_modules/"
       - name: Build Release
         if: ${{ env.NEW_RELEASE == 'true' }}
         uses: goreleaser/goreleaser-action@v2
@@ -61,7 +62,6 @@ jobs:
           #   [ "master",
           #     "${{ env.BRANCH_NAME }}"
           #   ]
-          dry_run: true
           extra_plugins: |
             @semantic-release/changelog
             @semantic-release/exec
