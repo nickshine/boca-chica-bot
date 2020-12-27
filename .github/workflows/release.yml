@@ -52,24 +52,29 @@ jobs:
           args: build --rm-dist --skip-validate
         env:
           GORELEASER_CURRENT_TAG: v${{ env.VERSION }}
-      - name: Clear node_modules for npm ci
-        run: rm -rf node_modules/
-      - run: ls -al
+      - name: Setup Node
+        uses: actions/setup-node@v1
+      - run: npm i -D @semantic-release/changelog @semantic-release/exec @semantic-release/git
       - name: Release
-        if: ${{ env.NEW_RELEASE == 'true' }}
-        uses: cycjimmy/semantic-release-action@v2
-        with:
-          semantic_version: 17
-          # branches: |
-          #   [ "master",
-          #     "${{ env.BRANCH_NAME }}"
-          #   ]
-          extra_plugins: |
-            @semantic-release/changelog
-            @semantic-release/exec
-            @semantic-release/git
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ENV: $GITHUB_ENV
+        run: npx semantic-release@17
+      # - name: Release
+      #   if: ${{ env.NEW_RELEASE == 'true' }}
+      #   uses: cycjimmy/semantic-release-action@v2
+      #   with:
+      #     semantic_version: 17
+      #     # branches: |
+      #     #   [ "master",
+      #     #     "${{ env.BRANCH_NAME }}"
+      #     #   ]
+      #     extra_plugins: |
+      #       @semantic-release/changelog
+      #       @semantic-release/exec
+      #       @semantic-release/git
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     GITHUB_ENV: $GITHUB_ENV
       - name: Go Report Card
         uses: creekorful/goreportcard-action@v1.0
