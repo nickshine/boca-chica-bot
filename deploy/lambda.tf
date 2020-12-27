@@ -44,39 +44,79 @@ resource "aws_iam_role_policy_attachment" "AmazonSSMReadOnlyAccess" {
   policy_arn = data.aws_iam_policy.AmazonSSMReadOnlyAccess.arn
 }
 
-resource "aws_lambda_function" "lambda" {
-  filename      = "${path.root}/lambda/lambda.zip"
-  function_name = "${var.app}-${var.env}"
+############################ scraper lambda ####################################
+
+resource "aws_lambda_function" "scraper_lambda" {
+  filename      = "${path.root}/lambda/scraper-lambda.zip"
+  function_name = "${var.app}-scraper-${var.env}"
   role          = aws_iam_role.lambda-exec.arn
-  handler       = var.app
+  handler       = "${var.app}-scraper"
   publish       = true
 
-  source_code_hash = filebase64sha256("${path.root}/lambda/lambda.zip")
+  source_code_hash = filebase64sha256("${path.root}/lambda/scraper-lambda.zip")
   runtime          = "go1.x"
 
   environment {
     variables = {
-      DEBUG               = var.debug
-      DISABLE_TWEETS      = var.disable_tweets
-      TWITTER_ENVIRONMENT = var.env
+      DEBUG           = var.debug
+      AWS_ENVIRONMENT = var.env
     }
   }
 
   tags = local.tags
 }
 
-resource "aws_lambda_alias" "lambda" {
+resource "aws_lambda_alias" "scraper_lambda" {
   name             = var.env
   description      = "environment"
-  function_name    = aws_lambda_function.lambda.arn
-  function_version = aws_lambda_function.lambda.version
+  function_name    = aws_lambda_function.scraper_lambda.arn
+  function_version = aws_lambda_function.scraper_lambda.version
 }
 
 resource "aws_lambda_permission" "allow_eventbridge" {
   statement_id  = "AllowExecutionFromEventBridge"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.lambda.function_name
+  function_name = aws_lambda_function.scraper_lambda.function_name
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.cron.arn
-  qualifier     = aws_lambda_alias.lambda.name
+  qualifier     = aws_lambda_alias.scraper_lambda.name
+}
+
+############################ publisher lambda ####################################
+
+resource "aws_lambda_function" "publisher_lambda" {
+  filename      = "${path.root}/lambda/publisher-lambda.zip"
+  function_name = "${var.app}-publisher-${var.env}"
+  role          = aws_iam_role.lambda-exec.arn
+  handler       = "${var.app}-publisher"
+  publish       = true
+
+  source_code_hash = filebase64sha256("${path.root}/lambda/publisher-lambda.zip")
+  runtime          = "go1.x"
+
+  environment {
+    variables = {
+      DEBUG           = var.debug
+      DISABLE_TWEETS  = var.disable_tweets
+      AWS_ENVIRONMENT = var.env
+    }
+  }
+
+  tags = local.tags
+}
+
+resource "aws_lambda_alias" "publisher_lambda" {
+  name             = var.env
+  description      = "environment"
+  function_name    = aws_lambda_function.publisher_lambda.arn
+  function_version = aws_lambda_function.publisher_lambda.version
+}
+
+
+resource "aws_lambda_event_source_mapping" "dynamodb" {
+  event_source_arn       = aws_dynamodb_table.table.stream_arn
+  function_name          = aws_lambda_function.publisher_lambda.arn
+  batch_size             = 1
+  starting_position      = "TRIM_HORIZON"
+  maximum_retry_attempts = 1
 }

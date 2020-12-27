@@ -1,4 +1,5 @@
 .env
+payload.json
 *.test
 bin/
 dist/
