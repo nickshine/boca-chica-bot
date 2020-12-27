@@ -3,7 +3,6 @@ package db
 import (
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -19,44 +18,40 @@ func buildPutInput(tablename string, c *closures.Closure) *dynamodb.PutItemInput
 			"Date": {
 				S: aws.String(c.Date),
 			},
+			"RawTimeRange": {
+				S: aws.String(c.RawTimeRange),
+			},
 			"Time": {
-				S: aws.String(c.Time),
+				N: aws.String(fmt.Sprint(c.Time)),
 			},
-			"Start": {
-				S: aws.String(c.Start.Format(time.RFC3339)),
-			},
-			"End": {
-				S: aws.String(c.End.Format(time.RFC3339)),
+			"TimeType": {
+				S: aws.String(c.TimeType),
 			},
 			"Status": {
 				S: aws.String(c.Status),
-			},
-			"Expires": {
-				N: aws.String(fmt.Sprint(c.Expires)),
 			},
 		},
 		ReturnConsumedCapacity: aws.String("TOTAL"),
 		TableName:              aws.String(tablename),
 		ReturnValues:           aws.String("ALL_OLD"),
 		// Only overwrite existing if something has changed
-		ConditionExpression: aws.String("ClosureType <> :type OR #Status <> :status OR #Start <> :start OR #End <> :end"),
+		ConditionExpression: aws.String("#Status <> :status OR #Time <> :time OR ClosureType <> :type OR RawTimeRange <> :rawTimeRange"), // nolint
 		ExpressionAttributeNames: map[string]*string{
 			"#Status": aws.String("Status"),
-			"#Start":  aws.String("Start"),
-			"#End":    aws.String("End"),
+			"#Time":   aws.String("Time"),
 		},
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":end": {
-				S: aws.String(c.End.Format(time.RFC3339)),
-			},
-			":start": {
-				S: aws.String(c.Start.Format(time.RFC3339)),
-			},
 			":status": {
 				S: aws.String(c.Status),
 			},
+			":time": {
+				N: aws.String(fmt.Sprint(c.Time)),
+			},
 			":type": {
 				S: aws.String(c.ClosureType),
+			},
+			":rawTimeRange": {
+				S: aws.String(c.RawTimeRange),
 			},
 		},
 	}
@@ -71,32 +66,22 @@ func buildClosure(attributes map[string]*dynamodb.AttributeValue) (*closures.Clo
 
 	ct := aws.StringValue(attributes["ClosureType"].S)
 	date := aws.StringValue(attributes["Date"].S)
-	timeRange := aws.StringValue(attributes["Time"].S)
-	startString := aws.StringValue(attributes["Start"].S)
-	start, err := time.Parse(time.RFC3339, startString)
+	rawTimeRange := aws.StringValue(attributes["RawTimeRange"].S)
+	timeString := aws.StringValue(attributes["Time"].N)
+	timestamp, err := strconv.ParseInt(timeString, 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("problem parsing 'Start' attribute: %v", err)
+		return nil, fmt.Errorf("problem parsing 'Time' attribute: %v", err)
 	}
-	endString := aws.StringValue(attributes["End"].S)
-	end, err := time.Parse(time.RFC3339, endString)
-	if err != nil {
-		return nil, fmt.Errorf("problem parsing 'End' attribute: %v", err)
-	}
+	timeType := aws.StringValue(attributes["TimeType"].S)
 	status := aws.StringValue(attributes["Status"].S)
-	expiresString := aws.StringValue(attributes["Expires"].N)
-	expires, err := strconv.ParseInt(expiresString, 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf("problem parsing 'Expires' attribute: %v", err)
-	}
 
 	c := &closures.Closure{
-		ClosureType: ct,
-		Date:        date,
-		Time:        timeRange,
-		Start:       start,
-		End:         end,
-		Status:      status,
-		Expires:     expires,
+		ClosureType:  ct,
+		Date:         date,
+		RawTimeRange: rawTimeRange,
+		Time:         timestamp,
+		TimeType:     timeType,
+		Status:       status,
 	}
 
 	return c, nil

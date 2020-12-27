@@ -12,11 +12,19 @@ import (
 	"golang.org/x/net/html"
 )
 
-// CancelledStatus represents the cancelled Boca Chica Beach status display text.
-const CancelledStatus = "Closure Cancelled"
+const (
+	// CancelledStatus represents the cancelled Boca Chica Beach status display text.
+	CancelledStatus = "Closure Cancelled"
 
-// SiteURL is the website publishing the Boca Chica Beach and Road closures.
-const SiteURL = "https://www.cameroncounty.us/spacex/"
+	// TimeTypeStart represents a Closure's beginning time in a posted time range.
+	TimeTypeStart = "start"
+
+	// TimeTypeEnd represents a Closure's ending time in a posted time range.
+	TimeTypeEnd = "end"
+
+	// SiteURL is the website publishing the Boca Chica Beach and Road closures.
+	SiteURL = "https://www.cameroncounty.us/spacex/"
+)
 
 const (
 	dateLayout      = "Monday, Jan 2, 2006"
@@ -69,8 +77,8 @@ func (d *doc) getClosures() ([]*Closure, error) {
 
 		// reset dateString to formated 'Jan 2, 2006' for primary key consistency
 		dateString = date.Format(dateLayout)
-		timeString := strings.TrimSpace(cells.Get(2).FirstChild.Data)
-		startTime, endTime, err := parseTimeRange(timeString)
+		rawTimeRange := strings.TrimSpace(cells.Get(2).FirstChild.Data)
+		startTime, endTime, err := parseTimeRange(rawTimeRange)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse time range: %s", err)
 		}
@@ -79,17 +87,27 @@ func (d *doc) getClosures() ([]*Closure, error) {
 		endDate := time.Date(date.Year(), date.Month(), date.Day(), endTime.Hour(), endTime.Minute(), 0, 0, location)
 
 		status := strings.TrimSpace(cells.Get(3).FirstChild.Data)
-		expires := endDate.Unix()
 
+		zone, _ := startDate.Zone()
+		rawTimeRangeWithZone := fmt.Sprintf("%s (%s)", rawTimeRange, zone)
+
+		// create a Closure for the start and end of the time range
 		closures = append(closures,
 			&Closure{
-				ClosureType: closureType,
-				Date:        dateString,
-				Time:        timeString,
-				Start:       startDate,
-				End:         endDate,
-				Status:      status,
-				Expires:     expires,
+				ClosureType:  closureType,
+				Date:         dateString,
+				RawTimeRange: rawTimeRangeWithZone,
+				Time:         startDate.Unix(),
+				TimeType:     TimeTypeStart,
+				Status:       status,
+			},
+			&Closure{
+				ClosureType:  closureType,
+				Date:         dateString,
+				RawTimeRange: rawTimeRangeWithZone,
+				Time:         endDate.Unix(),
+				TimeType:     TimeTypeEnd,
+				Status:       status,
 			},
 		)
 	}

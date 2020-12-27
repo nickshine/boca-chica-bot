@@ -9,5 +9,5 @@ resource "aws_cloudwatch_event_rule" "cron" {
 
 resource "aws_cloudwatch_event_target" "lambda" {
   rule = aws_cloudwatch_event_rule.cron.name
-  arn  = aws_lambda_alias.lambda.arn
+  arn  = aws_lambda_alias.scraper_lambda.arn
 }

@@ -7,6 +7,9 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/nickshine/boca-chica-bot/internal/param"
+	"github.com/nickshine/boca-chica-bot/internal/twitter"
+	"github.com/nickshine/boca-chica-bot/pkg/closures"
 	"go.uber.org/zap"
 )
 
@@ -25,7 +28,7 @@ func init() {
 	defer logger.Sync() // nolint:errcheck
 	log = logger.Sugar()
 
-	if os.Getenv("TWITTER_ENVIRONMENT") == "test" {
+	if os.Getenv("AWS_ENVIRONMENT") == "test" {
 		twitterParamsPath = "/boca-chica-bot/test/"
 	}
 }
@@ -36,62 +39,71 @@ func main() {
 
 func handler(ctx context.Context, e events.DynamoDBEvent) error {
 	log.Debugf("Event: %+v\n", e)
+	var tweets []string
 	for _, record := range e.Records {
 		fmt.Printf("Processing request data for event ID %s, type %s.\n", record.EventID, record.EventName)
 
-		switch record.EventName {
-		case string(events.DynamoDBOperationTypeInsert):
-			fmt.Println("INSERT")
-		case string(events.DynamoDBOperationTypeModify):
-			fmt.Println("MODIFY")
-		case string(events.DynamoDBOperationTypeRemove):
+		var image map[string]events.DynamoDBAttributeValue
 
-			for name, value := range record.Change.OldImage {
-				if value.DataType() == events.DataTypeNumber {
-					fmt.Printf("Attribute name: %s, value: %s\n", name, value.Number())
-				} else {
-					fmt.Printf("Attribute name: %s, value: %s\n", name, value.String())
-				}
+		if record.Change.NewImage != nil {
+			image = record.Change.NewImage
+		} else if record.Change.OldImage != nil {
+			image = record.Change.OldImage
+		} else {
+			return fmt.Errorf("Invalid DynamoDBEvent: %v", e)
+		}
+
+		closureType := image["ClosureType"].String()
+		date := image["Date"].String()
+		rawTimeRange := image["RawTimeRange"].String()
+		timeType := image["TimeType"].String()
+		status := image["Status"].String()
+
+		switch record.EventName {
+		// An INSERT event means a new Closure has been added
+		case string(events.DynamoDBOperationTypeInsert):
+			// Each closure has two entries, a 'start' type and 'end' type.  Only tweet a new closure once (on 'start' type).
+			if timeType == closures.TimeTypeEnd {
+				log.Debugf("Closure TimeType of '%s' on 'INSERT', skipping publish", timeType)
+				return nil
+			}
+
+			tweets = append(tweets, fmt.Sprintf("New closure scheduled:\n%s - %s - %s\n%s\n#spacex #starship",
+				closureType, date, rawTimeRange, closures.SiteURL))
+		case string(events.DynamoDBOperationTypeModify):
+			// Each closure has two entries, a 'start' type and 'end' type.  Only tweet a closure update once (on 'start' type).
+			if timeType == closures.TimeTypeEnd {
+				log.Debugf("Closure TimeType of '%s' on 'MODIFY', skipping publish", timeType)
+				return nil
+			}
+			if status == closures.CancelledStatus {
+				tweets = append(tweets, fmt.Sprintf("Closure for %s - %s has been cancelled.\n%s\n#spacex #starship",
+					date, rawTimeRange, closures.SiteURL))
+			} else {
+				tweets = append(tweets, fmt.Sprintf("Closure status change:\n%s - %s - %s\n%s\n#spacex #starship",
+					date, rawTimeRange, status, closures.SiteURL))
+			}
+		// A REMOVE event means the closure has expired (time range started or ended)
+		case string(events.DynamoDBOperationTypeRemove):
+			if timeType == closures.TimeTypeStart {
+				tweets = append(tweets, fmt.Sprintf("Closure for %s - %s has started.\n%s\n#spacex #starship",
+					date, rawTimeRange, closures.SiteURL))
+			} else if timeType == closures.TimeTypeEnd {
+				tweets = append(tweets, fmt.Sprintf("Closure for %s - %s has ended.\n%s\n#spacex #starship",
+					date, rawTimeRange, closures.SiteURL))
 			}
 		}
 	}
 
-	// TODO: create tweet string from event INSERT, MODIFY, or REMOVE
-
-	/*
-		if err != nil {
-			switch err.(type) {
-			case *db.ItemUnchangedError:
-				log.Debugf("%s - Closure: %s", err.Error(), c)
-			default:
-				log.Errorf("%s - Closure: %s", err.Error(), c)
-			}
-		} else if existingClosure != nil {
-			// if there was an existing closure in db and an attribute changed (e.g. status
-			// changed from "Scheduled" to "Cancelled")
-			if c.Status == closures.CancelledStatus {
-				tweet = fmt.Sprintf("Beach closure for %s - has been cancelled.\n%s\n#spacex #starship", c, closures.SiteURL)
-			} else {
-				tweet = fmt.Sprintf("Beach closure status change:\n%s - %s\n%s\n#spacex #starship", c, c.Status, closures.SiteURL)
-			}
-			tweets = append(tweets, tweet)
-		} else {
-			// existingClosure is nil (meaning new addition to db)
-			tweet = fmt.Sprintf("New beach closure scheduled:\n%s - %s\n%s\n#spacex #starship",
-				c.ClosureType, c, closures.SiteURL)
-			tweets = append(tweets, tweet)
-		}
-	*/
-
-	// tweet := ""
-	// return handleTweet(tweet)
-	return nil
+	return handleTweets(tweets)
 }
 
-/*
-func handleTweet(tweet string) error {
+func handleTweets(tweets []string) error {
+	if len(tweets) == 0 {
+		return nil
+	}
 	if disable := os.Getenv("DISABLE_TWEETS"); disable != "" && disable != "false" {
-		log.Debugf("DISABLE_TWEETS env var enabled, skipping publishing of tweet: %v", tweet)
+		log.Debugf("DISABLE_TWEETS env var enabled, skipping publishing of tweets: %v", tweets)
 		return nil
 	}
 
@@ -115,14 +127,15 @@ func handleTweet(tweet string) error {
 
 	// log.Debug(client.Verify())
 
-	log.Debugf("Tweet length: %d\n", len(tweet))
-	log.Infof("Tweeting: %s\n", tweet)
-	createdAt, err := client.Tweet(tweet)
-	if err != nil {
-		return err
-	}
-	log.Debugf("Tweet created at %s", createdAt)
+	for _, t := range tweets {
+		log.Debugf("Tweet length: %d\n", len(t))
+		log.Infof("Tweeting: %s\n", t)
+		createdAt, err := client.Tweet(t)
+		if err != nil {
+			return err
+		}
+		log.Debugf("Tweet created at %s", createdAt)
 
+	}
 	return nil
 }
-*/

@@ -32,7 +32,7 @@ func init() {
 
 	dbClient = db.NewClient()
 
-	if os.Getenv("TWITTER_ENVIRONMENT") == "test" {
+	if os.Getenv("AWS_ENVIRONMENT") == "test" {
 		tablename = "BocaChicaBot-closures-test"
 	}
 }
@@ -49,7 +49,7 @@ func handler() error {
 
 	for _, c := range cls {
 		// don't bother putting expired closures in db as the TTL will remove them anyways
-		if time.Now().Unix() < c.Expires {
+		if time.Now().Unix() < c.Time {
 			existingClosure, err := dbClient.Put(tablename, c)
 			if err != nil {
 				switch err.(type) {
@@ -61,7 +61,11 @@ func handler() error {
 			} else if existingClosure != nil {
 				// if there was an existing closure in db that was overwritten
 				log.Debugf("Closure changed: %s", c)
+			} else {
+				log.Debugf("New closure added: %s", c)
 			}
+		} else {
+			log.Debugf("Closure expired, skipping database call: %s", c)
 		}
 	}
 
