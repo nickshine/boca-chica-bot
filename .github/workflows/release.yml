@@ -14,29 +14,40 @@ jobs:
           fetch-depth: 0
       - uses: actions/cache@v2
         with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          path: |
+            ~/go/pkg/mod
+            node_modules
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum', '**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-go-
       # - name: Get branch name
       #   run: echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
+      - name: Setup Node
+        uses: actions/setup-node@v2
+      - name: Setup Semantic-Release
+        run: npm i -D @semantic-release/changelog @semantic-release/exec @semantic-release/git semantic-release@17
       - name: Get Release Version
-        uses: cycjimmy/semantic-release-action@v2
-        id: semantic-dry-run
-        with:
-          semantic_version: 17
-          # branches: |
-          #   [ "master",
-          #     "${{ env.BRANCH_NAME }}"
-          #   ]
-          dry_run: true
-          extra_plugins: |
-            @semantic-release/changelog
-            @semantic-release/exec
-            @semantic-release/git
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ENV: $GITHUB_ENV
+        run: npx semantic-release --dry-run
+      # - name: Get Release Version
+      #   uses: cycjimmy/semantic-release-action@v2
+      #   id: semantic-dry-run
+      #   with:
+      #     semantic_version: 17
+      #     # branches: |
+      #     #   [ "master",
+      #     #     "${{ env.BRANCH_NAME }}"
+      #     #   ]
+      #     dry_run: true
+      #     extra_plugins: |
+      #       @semantic-release/changelog
+      #       @semantic-release/exec
+      #       @semantic-release/git
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     GITHUB_ENV: $GITHUB_ENV
 
       - name: Set Go Version
         run: echo "GO_VERSION=$(grep "go 1." go.mod | cut -d " " -f 2)" >> $GITHUB_ENV
@@ -52,9 +63,7 @@ jobs:
           args: build --rm-dist --skip-validate
         env:
           GORELEASER_CURRENT_TAG: v${{ env.VERSION }}
-      - name: Setup Node
-        uses: actions/setup-node@v1
-      - run: npm i -D @semantic-release/changelog @semantic-release/exec @semantic-release/git
+      - run: ls -al dist
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

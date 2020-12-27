@@ -33,7 +33,16 @@ builds:
     goarch:
       - amd64
 archives:
-  - format: zip
+  - id: scraper
+    builds:
+      - scraper
+    format: zip
+    name_template: "{{ .ProjectName }}-scraper_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  - id: publisher
+    builds:
+      - publisher
+    format: zip
+    name_template: "{{ .ProjectName }}-publisher_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 changelog:
   skip: true
 release:
