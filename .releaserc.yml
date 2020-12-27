@@ -14,5 +14,4 @@ plugins:
     - assets:
         - path: "dist/*.zip"
         - path: "dist/*checksums.txt"
-
-
+debug: true
