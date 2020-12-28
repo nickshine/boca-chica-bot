@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/nickshine/boca-chica-bot/compare/v1.1.1...v1.1.2) (2020-12-28)
+
+
+### Bug Fixes
+
+* skip publishing expired closures if status is cancelled ([e24ac51](https://github.com/nickshine/boca-chica-bot/commit/e24ac51b77c6e1dc93523dce0084b0a51dde8e4e))
+
 ## [1.1.1](https://github.com/nickshine/boca-chica-bot/compare/v1.1.0...v1.1.1) (2020-12-27)
 
 
