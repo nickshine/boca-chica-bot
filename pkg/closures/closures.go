@@ -16,6 +16,9 @@ const (
 	// CancelledStatus represents the cancelled Boca Chica Beach status display text.
 	CancelledStatus = "Closure Cancelled"
 
+	// ScheduledStatus represents the scheduled Boca Chica Beach status display text.
+	ScheduledStatus = "Closure Scheduled"
+
 	// TimeTypeStart represents a Closure's beginning time in a posted time range.
 	TimeTypeStart = "start"
 

@@ -31,24 +31,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ENV: $GITHUB_ENV
         run: npx semantic-release --dry-run
-      # - name: Get Release Version
-      #   uses: cycjimmy/semantic-release-action@v2
-      #   id: semantic-dry-run
-      #   with:
-      #     semantic_version: 17
-      #     # branches: |
-      #     #   [ "master",
-      #     #     "${{ env.BRANCH_NAME }}"
-      #     #   ]
-      #     dry_run: true
-      #     extra_plugins: |
-      #       @semantic-release/changelog
-      #       @semantic-release/exec
-      #       @semantic-release/git
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     GITHUB_ENV: $GITHUB_ENV
-
+        # run: npx semantic-release --dry-run --branches ${{ env.BRANCH_NAME }}
       - name: Set Go Version
         run: echo "GO_VERSION=$(grep "go 1." go.mod | cut -d " " -f 2)" >> $GITHUB_ENV
       - name: Set up Go
@@ -60,7 +43,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
-          args: build --rm-dist --skip-validate
+          args: --skip-publish --rm-dist --skip-validate
         env:
           GORELEASER_CURRENT_TAG: v${{ env.VERSION }}
       - run: ls -al dist
@@ -69,21 +52,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ENV: $GITHUB_ENV
         run: npx semantic-release@17
-      # - name: Release
-      #   if: ${{ env.NEW_RELEASE == 'true' }}
-      #   uses: cycjimmy/semantic-release-action@v2
-      #   with:
-      #     semantic_version: 17
-      #     # branches: |
-      #     #   [ "master",
-      #     #     "${{ env.BRANCH_NAME }}"
-      #     #   ]
-      #     extra_plugins: |
-      #       @semantic-release/changelog
-      #       @semantic-release/exec
-      #       @semantic-release/git
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     GITHUB_ENV: $GITHUB_ENV
       - name: Go Report Card
         uses: creekorful/goreportcard-action@v1.0
