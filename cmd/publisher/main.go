@@ -66,6 +66,9 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 			if timeType == closures.TimeTypeEnd {
 				log.Debugf("Closure TimeType of '%s' on 'INSERT', skipping publish", timeType)
 				return nil
+			} else if status == closures.CancelledStatus {
+				log.Debugf("Closure Status of '%s' on 'INSERT', skipping publish", status)
+				return nil
 			}
 
 			tweets = append(tweets, fmt.Sprintf("New closure scheduled:\n%s - %s - %s\n%s\n#spacex #starship",
@@ -85,6 +88,10 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 			}
 		// A REMOVE event means the closure has expired (time range started or ended)
 		case string(events.DynamoDBOperationTypeRemove):
+			if status != closures.ScheduledStatus {
+				log.Debugf("Closure Status of '%s' on 'REMOVE', skipping publish", status)
+				return nil
+			}
 			if timeType == closures.TimeTypeStart {
 				tweets = append(tweets, fmt.Sprintf("Closure for %s - %s has started.\n%s\n#spacex #starship",
 					date, rawTimeRange, closures.SiteURL))
