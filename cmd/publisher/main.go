@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/nickshine/boca-chica-bot/internal/discord"
 	"github.com/nickshine/boca-chica-bot/internal/param"
 	"github.com/nickshine/boca-chica-bot/internal/twitter"
 	"github.com/nickshine/boca-chica-bot/pkg/closures"
@@ -15,7 +16,7 @@ import (
 
 var log *zap.SugaredLogger
 
-var twitterParamsPath = "/boca-chica-bot/prod/"
+var paramsPath = "/boca-chica-bot/prod/"
 
 func init() {
 	var logger *zap.Logger
@@ -29,7 +30,7 @@ func init() {
 	log = logger.Sugar()
 
 	if os.Getenv("AWS_ENVIRONMENT") == "test" {
-		twitterParamsPath = "/boca-chica-bot/test/"
+		paramsPath = "/boca-chica-bot/test/"
 	}
 }
 
@@ -102,24 +103,46 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 		}
 	}
 
-	return handleTweets(tweets)
-}
-
-func handleTweets(tweets []string) error {
-	if len(tweets) == 0 {
+	if len(tweets) != 0 {
 		return nil
-	}
-	if disable := os.Getenv("DISABLE_TWEETS"); disable != "" && disable != "false" {
+	} else if disable := os.Getenv("DISABLE_TWEETS"); disable != "" && disable != "false" {
 		log.Debugf("DISABLE_TWEETS env var enabled, skipping publishing of tweets: %v", tweets)
 		return nil
 	}
 
 	pClient := param.NewClient()
-	params, err := pClient.GetParams(twitterParamsPath)
+	params, err := pClient.GetParams(paramsPath)
 	if err != nil {
-		return fmt.Errorf("error retrieving Twitter API creds from parameter store: %v", err)
+		return fmt.Errorf("error retrieving Twitter/Discord API creds from parameter store: %v", err)
 	}
 
+	err = handleTweets(params, tweets)
+	if err != nil {
+		log.Error(err)
+	}
+	err = handleDiscord(params, tweets)
+	return err
+}
+
+func handleDiscord(params map[string]string, messages []string) error {
+	c := &discord.Credentials{
+		Token: params["discord_bot_token"],
+	}
+
+	discord, err := discord.GetSession(c)
+	if err != nil {
+		return fmt.Errorf("error getting twitter client: %v", err)
+	}
+
+	errors := discord.Send(messages)
+	for _, e := range errors {
+		log.Error(e)
+	}
+
+	return nil
+}
+
+func handleTweets(params map[string]string, tweets []string) error {
 	c := &twitter.Credentials{
 		ConsumerKey:    params["twitter_consumer_key"],
 		ConsumerSecret: params["twitter_consumer_secret"],
