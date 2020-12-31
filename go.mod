@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/PuerkitoBio/goquery v1.6.0
-	github.com/aws/aws-lambda-go v1.21.0
+	github.com/aws/aws-lambda-go v1.22.0
 	github.com/aws/aws-sdk-go v1.36.16
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/dghubble/go-twitter v0.0.0-20201011215211-4b180d0cc78d
