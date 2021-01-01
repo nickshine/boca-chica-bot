@@ -1,10 +1,10 @@
 # :rocket: boca-chica-bot
 
->I am a Twitter Bot that tweets status updates to [beach and road closures related to SpaceX
+>I am a Twitter and Discord Bot that posts status updates on [beach and road closures related to SpaceX
 Starship testing][cameron-county-spacex] in Boca Chica, TX.
 
 [![twitter-badge]][@bocachicabot]  
-[Add me to your Discord Server](https://discord.com/api/oauth2/authorize?client_id=782492119063199744&permissions=2048&scope=bot)
+[![discord-invite-badge]][bocachicabot-discord-invite] <sup>see [Discord Installation](#discord-installation) below</sup>
 
 <p align="center">
 <img width="500" src="assets/boca-chica-bot.jpg">
@@ -17,13 +17,31 @@ Starship testing][cameron-county-spacex] in Boca Chica, TX.
 ## How I Work
 
 I periodically pull the published road and beach closures from the [Cameron County SpaceX
-page][cameron-county-spacex] to see if there are any changes or additions, then tweet them out as
-[@BocaChicaBot].
+page][cameron-county-spacex] to see if there are any changes or additions, then post status
+updates via Twitter and Discord as [@BocaChicaBot].
+
+Currently I will post a tweet/notification when:
+
+- A closure is added or changed
+- A closure has started or ended
 
 I'm written in [Go] and run [serverless] in [AWS] using [AWS Lambda], [DynamoDB], and [EventBridge].
 
 ![arch diagram](./assets/boca-chica-bot.drawio.png)
 
+---
+
+## Discord Installation
+
+I am not a typical Discord Bot that responds to commands on demand. **I only post notifications to
+the channels in the Discord server you add me to.**
+
+**I will post to *all* channels in the server by default**. This is likely not what you want, so
+be sure to [disable the Send Messages
+permission][discord-disable-send-messages] for the BocaChicaBot Role in the channels/categories
+you'd like to disable me in.
+
+[![discord-invite-badge]][bocachicabot-discord-invite]
 
 ---
 
@@ -49,8 +67,9 @@ Required Terraform Variables in Terraform Cloud:
 - `twitter_consumer_secret`
 - `twitter_access_secret`
 - `twitter_access_token`
+- `discord_bot_token`
 
-These are used to populate the Parameter Store with the required Twitter API creds.
+These are used to populate the Parameter Store with the required Twitter and Discord API creds.
 
 ## Local Development
 
@@ -76,18 +95,20 @@ make run
 
 ## Reference
 
-* [AWS SDK for Go][aws-sdk-go]
-* [AWS Lambda]
-* [DynamoDB]
-* [AWS Systems Manager Parameter Store][aws-param-store]
-* [Twitter API Docs]
-* [Twitter API authentication][twitter-api-auth]
+- [AWS SDK for Go][aws-sdk-go]
+- [AWS Lambda]
+- [DynamoDB]
+- [AWS Systems Manager Parameter Store][aws-param-store]
+- [Twitter API Docs]
+- [Twitter API authentication][twitter-api-auth]
 
 [aws]:https://aws.amazon.com/
 [aws lambda]:https://aws.amazon.com/lambda/
 [aws-param-store]:https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html
 [aws-sdk-go]:https://docs.aws.amazon.com/sdk-for-go/
 [cameron-county-spacex]:https://www.cameroncounty.us/spacex/
+[discord-disable-send-messages]:https://support.discord.com/hc/en-us/articles/206029707-How-do-I-set-up-Permissions-
+[discord-invite-badge]:https://img.shields.io/static/v1?label=Discord&logo=Discord&message=Invite%20@BocaChicaBot&colorB=7289DA
 [dynamodb]:https://aws.amazon.com/dynamodb/
 [EventBridge]:https://aws.amazon.com/eventbridge/
 [go]:https://golang.org/
@@ -104,3 +125,4 @@ make run
 [twitter-api-auth]:https://developer.twitter.com/en/docs/authentication/overview
 [twitter-badge]:https://img.shields.io/twitter/follow/BocaChicaBot?style=social
 [@BocaChicaBot]:https://twitter.com/bocachicabot
+[bocachicabot-discord-invite]:https://discord.com/api/oauth2/authorize?client_id=782492119063199744&permissions=2048&scope=bot
