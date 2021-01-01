@@ -46,8 +46,8 @@ jobs:
           args: --skip-publish --rm-dist --skip-validate
         env:
           GORELEASER_CURRENT_TAG: v${{ env.VERSION }}
-      - run: ls -al dist
       - name: Release
+        if: ${{ env.NEW_RELEASE == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ENV: $GITHUB_ENV

@@ -3,7 +3,8 @@
 >I am a Twitter Bot that tweets status updates to [beach and road closures related to SpaceX
 Starship testing][cameron-county-spacex] in Boca Chica, TX.
 
-[![twitter-badge]][@bocachicabot]
+[![twitter-badge]][@bocachicabot]  
+[Add me to your Discord Server](https://discord.com/api/oauth2/authorize?client_id=782492119063199744&permissions=2048&scope=bot)
 
 <p align="center">
 <img width="500" src="assets/boca-chica-bot.jpg">
@@ -22,6 +23,7 @@ page][cameron-county-spacex] to see if there are any changes or additions, then 
 I'm written in [Go] and run [serverless] in [AWS] using [AWS Lambda], [DynamoDB], and [EventBridge].
 
 ![arch diagram](./assets/boca-chica-bot.drawio.svg)
+
 
 ---
 
@@ -59,7 +61,7 @@ AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
 AWS_REGION=us-east-1
 DEBUG=true
-DISABLE_TWEETS=true
+DISABLE_PUBLISH=true
 TWITTER_ENVIRONMENT=test
 ```
 

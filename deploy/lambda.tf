@@ -97,7 +97,7 @@ resource "aws_lambda_function" "publisher_lambda" {
   environment {
     variables = {
       DEBUG           = var.debug
-      DISABLE_TWEETS  = var.disable_tweets
+      DISABLE_PUBLISH = var.disable_publish
       AWS_ENVIRONMENT = var.env
     }
   }

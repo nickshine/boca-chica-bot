@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/nickshine/boca-chica-bot/internal/discord"
 	"github.com/nickshine/boca-chica-bot/internal/param"
 	"github.com/nickshine/boca-chica-bot/internal/twitter"
 	"github.com/nickshine/boca-chica-bot/pkg/closures"
@@ -15,7 +16,7 @@ import (
 
 var log *zap.SugaredLogger
 
-var twitterParamsPath = "/boca-chica-bot/prod/"
+var paramsPath = "/boca-chica-bot/prod/"
 
 func init() {
 	var logger *zap.Logger
@@ -29,7 +30,7 @@ func init() {
 	log = logger.Sugar()
 
 	if os.Getenv("AWS_ENVIRONMENT") == "test" {
-		twitterParamsPath = "/boca-chica-bot/test/"
+		paramsPath = "/boca-chica-bot/test/"
 	}
 }
 
@@ -39,15 +40,15 @@ func main() {
 
 func handler(ctx context.Context, e events.DynamoDBEvent) error {
 	log.Debugf("Event: %+v\n", e)
-	var tweets []string
+	var messages []string
 	for _, record := range e.Records {
-		fmt.Printf("Processing request data for event ID %s, type %s.\n", record.EventID, record.EventName)
+		log.Debugf("Processing request data for event ID %s, type %s.\n", record.EventID, record.EventName)
 
 		var image map[string]events.DynamoDBAttributeValue
 
-		if record.Change.NewImage != nil {
+		if len(record.Change.NewImage) > 0 {
 			image = record.Change.NewImage
-		} else if record.Change.OldImage != nil {
+		} else if len(record.Change.OldImage) > 0 {
 			image = record.Change.OldImage
 		} else {
 			return fmt.Errorf("Invalid DynamoDBEvent: %v", e)
@@ -71,7 +72,7 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 				return nil
 			}
 
-			tweets = append(tweets, fmt.Sprintf("New closure scheduled:\n%s - %s - %s\n%s\n#spacex #starship",
+			messages = append(messages, fmt.Sprintf("New closure scheduled:\n%s - %s - %s\n%s",
 				closureType, date, rawTimeRange, closures.SiteURL))
 		case string(events.DynamoDBOperationTypeModify):
 			// Each closure has two entries, a 'start' type and 'end' type.  Only tweet a closure update once (on 'start' type).
@@ -80,10 +81,10 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 				return nil
 			}
 			if status == closures.CancelledStatus {
-				tweets = append(tweets, fmt.Sprintf("Closure for %s - %s has been cancelled.\n%s\n#spacex #starship",
+				messages = append(messages, fmt.Sprintf("Closure for %s - %s has been cancelled.\n%s",
 					date, rawTimeRange, closures.SiteURL))
 			} else {
-				tweets = append(tweets, fmt.Sprintf("Closure status change:\n%s - %s - %s\n%s\n#spacex #starship",
+				messages = append(messages, fmt.Sprintf("Closure status change:\n%s - %s - %s\n%s",
 					date, rawTimeRange, status, closures.SiteURL))
 			}
 		// A REMOVE event means the closure has expired (time range started or ended)
@@ -93,33 +94,61 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 				return nil
 			}
 			if timeType == closures.TimeTypeStart {
-				tweets = append(tweets, fmt.Sprintf("Closure for %s - %s has started.\n%s\n#spacex #starship",
+				messages = append(messages, fmt.Sprintf("Closure for %s - %s has started.\n%s",
 					date, rawTimeRange, closures.SiteURL))
 			} else if timeType == closures.TimeTypeEnd {
-				tweets = append(tweets, fmt.Sprintf("Closure for %s - %s has ended.\n%s\n#spacex #starship",
+				messages = append(messages, fmt.Sprintf("Closure for %s - %s has ended.\n%s",
 					date, rawTimeRange, closures.SiteURL))
 			}
 		}
 	}
 
-	return handleTweets(tweets)
-}
-
-func handleTweets(tweets []string) error {
-	if len(tweets) == 0 {
+	if len(messages) == 0 {
 		return nil
-	}
-	if disable := os.Getenv("DISABLE_TWEETS"); disable != "" && disable != "false" {
-		log.Debugf("DISABLE_TWEETS env var enabled, skipping publishing of tweets: %v", tweets)
+	} else if disable := os.Getenv("DISABLE_PUBLISH"); disable != "" && disable != "false" {
+		log.Debugf("DISABLE_PUBLISH env var enabled, skipping publishing of tweets: %v", messages)
 		return nil
 	}
 
 	pClient := param.NewClient()
-	params, err := pClient.GetParams(twitterParamsPath)
+	params, err := pClient.GetParams(paramsPath)
 	if err != nil {
-		return fmt.Errorf("error retrieving Twitter API creds from parameter store: %v", err)
+		return fmt.Errorf("error retrieving Twitter/Discord API creds from parameter store: %v", err)
 	}
 
+	err = handleTweets(params, messages)
+	if err != nil {
+		log.Error(err)
+	}
+	err = handleDiscord(params, messages)
+	return err
+}
+
+func handleDiscord(params map[string]string, messages []string) error {
+	c := &discord.Credentials{
+		Token: params["discord_bot_token"],
+	}
+
+	discordSession, err := discord.GetSession(c)
+	if err != nil {
+		return err
+	}
+
+	errors := discordSession.Send(messages)
+	log.Debug("Discord notification sent")
+	for _, e := range errors {
+		switch v := e.(type) {
+		case *discord.ChannelMessageSendError:
+			log.Debug(v)
+		default:
+			log.Error(e)
+		}
+	}
+
+	return nil
+}
+
+func handleTweets(params map[string]string, messages []string) error {
 	c := &twitter.Credentials{
 		ConsumerKey:    params["twitter_consumer_key"],
 		ConsumerSecret: params["twitter_consumer_secret"],
@@ -134,12 +163,12 @@ func handleTweets(tweets []string) error {
 
 	// log.Debug(client.Verify())
 
-	for _, t := range tweets {
+	for _, t := range messages {
 		log.Debugf("Tweet length: %d\n", len(t))
 		log.Infof("Tweeting: %s\n", t)
-		createdAt, err := client.Tweet(t)
+		createdAt, err := client.Tweet(t + "\n#spacex #starship")
 		if err != nil {
-			return err
+			log.Error(err)
 		}
 		log.Debugf("Tweet created at %s", createdAt)
 
