@@ -1,3 +1,15 @@
+# [1.2.0](https://github.com/nickshine/boca-chica-bot/compare/v1.1.2...v1.2.0) (2021-01-01)
+
+
+### Bug Fixes
+
+* use len check instead of nil check on dynamodb event record images ([eab6318](https://github.com/nickshine/boca-chica-bot/commit/eab631826c5dd7d62dcb566eb5b106a495933a73))
+
+
+### Features
+
+* implement initial discord integration ([a726076](https://github.com/nickshine/boca-chica-bot/commit/a72607664e1934f05c6cb4ac17927f58be8dec58))
+
 ## [1.1.2](https://github.com/nickshine/boca-chica-bot/compare/v1.1.1...v1.1.2) (2020-12-28)
 
 
