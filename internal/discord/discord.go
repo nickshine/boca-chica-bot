@@ -51,15 +51,15 @@ func (s *Session) Send(messages []string) []error {
 		}
 		for _, ch := range channels {
 			if ch.Type == discordgo.ChannelTypeGuildText {
-
 				// log.Debugf("Guild name: %s - Channel: %s", g.Name, ch.Name)
-				// TODO: remove hardcoded messages[0]
-				msg, err := ds.ChannelMessageSend(ch.ID, messages[0])
-				if err != nil {
-					discordErrors = append(discordErrors, fmt.Errorf("message send error: %s, msg: %+v", err, msg))
-					continue
+				for _, m := range messages {
+					_, err := ds.ChannelMessageSend(ch.ID, m)
+					if err != nil {
+						discordErrors = append(discordErrors, NewChannelMessageSendError(err))
+						continue
+					}
+					// log.Debugf("msg: %+v", msg)
 				}
-				// log.Debugf("msg: %+v", msg)
 			}
 		}
 	}

@@ -7,10 +7,16 @@ variable "debug" {
   default     = false
 }
 
-variable "disable_tweets" {
-  description = "Environment variable used in lambda function for disabling Tweets."
+variable "disable_publish" {
+  description = "Environment variable used in lambda function for disabling publishing to Twitter/Discord."
   type        = bool
   default     = false
+}
+
+variable "cron_schedule_enabled" {
+  description = "EventBridge rule enabled or disabled."
+  type        = bool
+  default     = true
 }
 
 variable "env" {
