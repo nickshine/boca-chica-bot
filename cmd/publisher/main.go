@@ -46,9 +46,9 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 
 		var image map[string]events.DynamoDBAttributeValue
 
-		if record.Change.NewImage != nil {
+		if len(record.Change.NewImage) > 0 {
 			image = record.Change.NewImage
-		} else if record.Change.OldImage != nil {
+		} else if len(record.Change.OldImage) > 0 {
 			image = record.Change.OldImage
 		} else {
 			return fmt.Errorf("Invalid DynamoDBEvent: %v", e)
@@ -135,6 +135,7 @@ func handleDiscord(params map[string]string, messages []string) error {
 	}
 
 	errors := discordSession.Send(messages)
+	log.Debug("Discord notification sent")
 	for _, e := range errors {
 		switch v := e.(type) {
 		case *discord.ChannelMessageSendError:
@@ -167,7 +168,7 @@ func handleTweets(params map[string]string, messages []string) error {
 		log.Infof("Tweeting: %s\n", t)
 		createdAt, err := client.Tweet(t + "\n#spacex #starship")
 		if err != nil {
-			return err
+			log.Error(err)
 		}
 		log.Debugf("Tweet created at %s", createdAt)
 
