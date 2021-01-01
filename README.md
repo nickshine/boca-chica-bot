@@ -22,7 +22,7 @@ page][cameron-county-spacex] to see if there are any changes or additions, then 
 
 I'm written in [Go] and run [serverless] in [AWS] using [AWS Lambda], [DynamoDB], and [EventBridge].
 
-![arch diagram](./assets/boca-chica-bot.drawio.svg)
+![arch diagram](./assets/boca-chica-bot.drawio.png)
 
 
 ---
