@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/nickshine/boca-chica-bot/compare/v1.2.0...v1.2.1) (2021-01-02)
+
+
+### Bug Fixes
+
+* change dynamodb sort key to avoid duplicates when time changes ([70caa3b](https://github.com/nickshine/boca-chica-bot/commit/70caa3b6c8a8464b0310761c4d67c0338bc204ec))
+
 # [1.2.0](https://github.com/nickshine/boca-chica-bot/compare/v1.1.2...v1.2.0) (2021-01-01)
 
 
