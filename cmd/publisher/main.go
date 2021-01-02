@@ -75,14 +75,22 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 			messages = append(messages, fmt.Sprintf("New closure scheduled:\n%s - %s - %s\n%s",
 				closureType, date, rawTimeRange, closures.SiteURL))
 		case string(events.DynamoDBOperationTypeModify):
+
 			// Each closure has two entries, a 'start' type and 'end' type.  Only tweet a closure update once (on 'start' type).
 			if timeType == closures.TimeTypeEnd {
 				log.Debugf("Closure TimeType of '%s' on 'MODIFY', skipping publish", timeType)
 				return nil
 			}
-			if status == closures.CancelledStatus {
-				messages = append(messages, fmt.Sprintf("Closure for %s - %s has been cancelled.\n%s",
-					date, rawTimeRange, closures.SiteURL))
+
+			oldRawTimeRange := record.Change.OldImage["RawTimeRange"].String()
+			oldStatus := record.Change.OldImage["Status"].String()
+
+			if status != oldStatus {
+				messages = append(messages, fmt.Sprintf("Status change for the %s closure: %s.\n%s",
+					date, status, closures.SiteURL))
+			} else if rawTimeRange != oldRawTimeRange {
+				messages = append(messages, fmt.Sprintf("Time window for the %s - %s closure has changed to %s.\n%s",
+					date, oldRawTimeRange, rawTimeRange, closures.SiteURL))
 			} else {
 				messages = append(messages, fmt.Sprintf("Closure status change:\n%s - %s - %s\n%s",
 					date, rawTimeRange, status, closures.SiteURL))
