@@ -15,6 +15,9 @@ func buildPutInput(tablename string, c *closures.Closure) *dynamodb.PutItemInput
 			"ClosureType": {
 				S: aws.String(c.ClosureType),
 			},
+			"ClosureTypeSort": {
+				S: aws.String(c.ClosureType + "#" + c.TimeType), // Primary Date#start, Primary Date#end
+			},
 			"Date": {
 				S: aws.String(c.Date),
 			},
