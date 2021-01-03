@@ -27,10 +27,12 @@ const (
 
 	// SiteURL is the website publishing the Boca Chica Beach and Road closures.
 	SiteURL = "https://www.cameroncounty.us/spacex/"
+
+	// DateLayout represents the current date layout posted for each Closure.
+	DateLayout = "Monday, Jan 2, 2006"
 )
 
 const (
-	dateLayout      = "Monday, Jan 2, 2006"
 	closureLocation = "America/Chicago"
 	timeLayout      = "3:04 pm"
 )
@@ -73,13 +75,13 @@ func (d *doc) getClosures() ([]*Closure, error) {
 
 		closureType := strings.TrimSpace(cells.Get(0).FirstChild.Data)
 		dateString := strings.TrimSpace(cells.Get(1).FirstChild.Data)
-		date, err := time.Parse(dateLayout, dateString)
+		date, err := time.Parse(DateLayout, dateString)
 		if err != nil {
 			return nil, fmt.Errorf("date format changed from 'Monday, Jan 2, 2006' to '%s'", cells.Get(1).FirstChild.Data)
 		}
 
-		// reset dateString to formated 'Jan 2, 2006' for primary key consistency
-		dateString = date.Format(dateLayout)
+		// reset dateString to formated 'Monday, Jan 2, 2006' for primary key consistency
+		dateString = date.Format(DateLayout)
 		rawTimeRange := strings.TrimSpace(cells.Get(2).FirstChild.Data)
 		startTime, endTime, err := parseTimeRange(rawTimeRange)
 		if err != nil {

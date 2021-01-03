@@ -69,5 +69,32 @@ func handler() error {
 		}
 	}
 
+	return handleRemovals()
+}
+
+// handleRemovals explicitly removes closures with Timestamps close to current time.
+//
+// The Time attribute on each item in the database has a TTL for expiration, but it is only
+// guaranteed to be removed within 48 hours, and the 'REMOVE' event is intended to happen at or
+// close to the timestamp in order to send the 'start' and 'end' closure notifications at the right
+// time. This explicit removal is a workaround around the eventual removal limitation of DynamoDB
+// TTLs.
+func handleRemovals() error {
+	// This will only return results when the function is ran the day of a Closure (partition key)
+	// close to the Timestamp of the Closure item (filter expression). Most of the time this will
+	// return nil.
+	cls, err := dbClient.QueryByTime(tablename, time.Now().Add(2*time.Minute))
+	if err != nil {
+		return err
+	}
+
+	for _, c := range cls {
+		log.Debugf("Closure to be removed: %s", c)
+		err := dbClient.RemoveClosure(tablename, c)
+		if err != nil {
+			log.Error("problem removing closure: %v", err)
+		}
+	}
+
 	return nil
 }

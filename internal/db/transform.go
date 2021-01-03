@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -55,6 +56,46 @@ func buildPutInput(tablename string, c *closures.Closure) *dynamodb.PutItemInput
 			},
 			":rawTimeRange": {
 				S: aws.String(c.RawTimeRange),
+			},
+		},
+	}
+
+	return input
+}
+
+func buildDeleteInput(tablename string, c *closures.Closure) *dynamodb.DeleteItemInput {
+	input := &dynamodb.DeleteItemInput{
+		TableName: aws.String(tablename),
+		Key: map[string]*dynamodb.AttributeValue{
+			"Date": {
+				S: aws.String(c.Date),
+			},
+			"ClosureTypeSort": {
+				S: aws.String(c.ClosureType + "#" + c.TimeType), // Primary Date#start, Primary Date#end
+			},
+		},
+		ReturnConsumedCapacity: aws.String("TOTAL"),
+	}
+
+	return input
+}
+
+func buildTimeQueryInput(tablename string, t time.Time) *dynamodb.QueryInput {
+	input := &dynamodb.QueryInput{
+		ReturnConsumedCapacity: aws.String("TOTAL"),
+		TableName:              aws.String(tablename),
+		KeyConditionExpression: aws.String("#Date = :date"),
+		FilterExpression:       aws.String("#Time <= :time"),
+		ExpressionAttributeNames: map[string]*string{
+			"#Date": aws.String("Date"),
+			"#Time": aws.String("Time"),
+		},
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":date": {
+				S: aws.String(t.Format(closures.DateLayout)),
+			},
+			":time": {
+				N: aws.String(fmt.Sprint(t.Unix())),
 			},
 		},
 	}

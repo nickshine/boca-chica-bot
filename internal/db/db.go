@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -52,4 +53,40 @@ func (client *Client) Put(tablename string, c *closures.Closure) (*closures.Clos
 	}
 
 	return closure, nil
+}
+
+// RemoveClosure removes the given Closure from the db table.
+func (client *Client) RemoveClosure(tablename string, c *closures.Closure) error {
+	input := buildDeleteInput(tablename, c)
+	_, err := (*dynamodb.DynamoDB)(client).DeleteItem(input)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// QueryByTime returns a slice of Closures with timestamps close to the passed in time.
+//
+// This will filter items with TTL'd Timestamps <= the given time.
+//
+func (client *Client) QueryByTime(tablename string, t time.Time) ([]*closures.Closure, error) {
+	input := buildTimeQueryInput(tablename, t)
+
+	res, err := (*dynamodb.DynamoDB)(client).Query(input)
+	if err != nil {
+		return nil, fmt.Errorf("db query error: %v", err)
+	}
+
+	// res.Items contains the items in the table matching the query.
+	var closures []*closures.Closure
+	for _, item := range res.Items {
+		closure, err := buildClosure(item)
+		if err != nil {
+			return closures, err
+		}
+		closures = append(closures, closure)
+	}
+
+	return closures, nil
 }
