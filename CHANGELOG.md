@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/nickshine/boca-chica-bot/compare/v1.2.1...v1.2.2) (2021-01-03)
+
+
+### Bug Fixes
+
+* explicitly remove closures from db if timestamp is < current time ([475ac57](https://github.com/nickshine/boca-chica-bot/commit/475ac577930b786c2558c114aa40b14df0c09174))
+
 ## [1.2.1](https://github.com/nickshine/boca-chica-bot/compare/v1.2.0...v1.2.1) (2021-01-02)
 
 
