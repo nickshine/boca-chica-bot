@@ -6,6 +6,12 @@ BUILD_FLAGS=-ldflags="-s -w"
 lint:
 	golangci-lint run -v
 
+test:
+	go test -v -covermode=count -coverprofile=coverage.out ./...
+
+cover:
+	go tool cover -html=coverage.out -o coverage.html
+
 build:
 	GOOS=linux GOARCH=amd64 go build $(BUILD_FLAGS) -o bin/$(SCRAPER_BINARY) ./cmd/scraper
 	GOOS=linux GOARCH=amd64 go build $(BUILD_FLAGS) -o bin/$(PUBLISHER_BINARY) ./cmd/publisher

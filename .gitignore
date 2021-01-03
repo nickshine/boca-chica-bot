@@ -15,3 +15,6 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 node_modules
+
+coverage.out
+coverage.html
