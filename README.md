@@ -12,6 +12,7 @@ Starship testing][cameron-county-spacex] in Boca Chica, TX.
 
 ![go-version-badge]
 [![go-report-card-badge]][go-report-card]
+[![codecov-badge]][boca-chica-bot-codecov]
 [![pkg-go-dev-badge]][pkg-go-dev]
 
 ## How I Work
@@ -107,6 +108,7 @@ make run
 [aws-param-store]:https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html
 [aws-sdk-go]:https://docs.aws.amazon.com/sdk-for-go/
 [cameron-county-spacex]:https://www.cameroncounty.us/spacex/
+[codecov-badge]:https://codecov.io/gh/nickshine/boca-chica-bot/branch/master/graph/badge.svg?token=171LQ10HAP
 [discord-disable-send-messages]:https://support.discord.com/hc/en-us/articles/206029707-How-do-I-set-up-Permissions-
 [discord-invite-badge]:https://img.shields.io/static/v1?label=Discord&logo=Discord&message=Invite%20@BocaChicaBot&colorB=7289DA
 [dynamodb]:https://aws.amazon.com/dynamodb/
@@ -126,3 +128,4 @@ make run
 [twitter-badge]:https://img.shields.io/twitter/follow/BocaChicaBot?style=social
 [@BocaChicaBot]:https://twitter.com/bocachicabot
 [bocachicabot-discord-invite]:https://discord.com/api/oauth2/authorize?client_id=782492119063199744&permissions=2048&scope=bot
+[boca-chica-bot-codecov]:https://codecov.io/gh/nickshine/boca-chica-bot
