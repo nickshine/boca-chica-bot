@@ -5,7 +5,7 @@ on:
   - pull_request
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -34,4 +34,4 @@ jobs:
       - name: Codecov
         uses: codecov/codecov-action@v1
         with:
-          file: ./coverage.txt
+          file: ./coverage.out
