@@ -69,7 +69,6 @@ func (client *Client) RemoveClosure(tablename string, c *closures.Closure) error
 // QueryByTime returns a slice of Closures with timestamps close to the passed in time.
 //
 // This will filter items with TTL'd Timestamps <= the given time.
-//
 func (client *Client) QueryByTime(tablename string, t time.Time) ([]*closures.Closure, error) {
 	input := buildTimeQueryInput(tablename, t)
 

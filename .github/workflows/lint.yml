@@ -1,8 +1,7 @@
 name: Lint Code Base
 
 on:
-  pull_request:
-    branches: [master]
+  - pull_request
 
 jobs:
   super-linter:
