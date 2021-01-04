@@ -39,7 +39,7 @@ const (
 
 // Get pulls the current beach/road closures from https://www.cameroncounty.us/spacex/.
 func Get() ([]*Closure, error) {
-	document, err := scrape(SiteURL)
+	document, err := scrapeClosuresSite()
 	if err != nil {
 		return nil, fmt.Errorf("failed to scrape Cameron County SpaceX page: %w", err)
 	}
@@ -141,10 +141,10 @@ func parseTimeRange(timeRange string) (*time.Time, *time.Time, error) {
 }
 
 // Scrape Cameron County SpaceX page for road Closures
-func scrape(url string) (*doc, error) {
+func scrapeClosuresSite() (*doc, error) {
 	client := &http.Client{Timeout: time.Second * 10}
 
-	res, err := client.Get(url)
+	res, err := client.Get(SiteURL)
 	if err != nil {
 		return nil, err
 	}
