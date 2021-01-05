@@ -176,9 +176,9 @@ func handleTweets(params map[string]string, messages []string) error {
 		log.Infof("Tweeting: %s\n", t)
 		createdAt, err := client.Tweet(t + "\n#spacex #starship")
 		if err != nil {
-			log.Error(err)
+			log.Info(err)
 		}
-		log.Debugf("Tweet created at %s", createdAt)
+		log.Debugf("Tweet created at %q", createdAt)
 
 	}
 	return nil
