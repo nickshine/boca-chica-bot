@@ -126,7 +126,7 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 
 	err = handleTweets(params, messages)
 	if err != nil {
-		log.Error(err)
+		log.Info(err)
 	}
 	err = handleDiscord(params, messages)
 	return err
