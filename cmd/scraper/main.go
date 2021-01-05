@@ -83,13 +83,15 @@ func handleRemovals() error {
 	// This will only return results when the function is ran the day of a Closure (partition key)
 	// close to the Timestamp of the Closure item (filter expression). Most of the time this will
 	// return nil.
-	cls, err := dbClient.QueryByTime(tablename, time.Now().Add(2*time.Minute))
+	threshold := time.Now().Add(2 * time.Minute)
+	cls, err := dbClient.QueryByTime(tablename, threshold)
 	if err != nil {
 		return err
 	}
 
+	log.Debugf("%d closures found for removal older than %s", len(cls), threshold)
 	for _, c := range cls {
-		log.Debugf("Closure to be removed: %s", c)
+		log.Debugf("Closure to be removed: %s - Time: %d", c, c.Time)
 		err := dbClient.RemoveClosure(tablename, c)
 		if err != nil {
 			log.Error("problem removing closure: %v", err)
