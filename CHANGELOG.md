@@ -1,3 +1,10 @@
+## [1.2.4](https://github.com/nickshine/boca-chica-bot/compare/v1.2.3...v1.2.4) (2021-01-05)
+
+
+### Bug Fixes
+
+* don't fail on error from twitter ([d0a8b70](https://github.com/nickshine/boca-chica-bot/commit/d0a8b70f30bffa2f8fe449968a73332340666192))
+
 ## [1.2.3](https://github.com/nickshine/boca-chica-bot/compare/v1.2.2...v1.2.3) (2021-01-05)
 
 
