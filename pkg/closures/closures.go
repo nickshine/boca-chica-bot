@@ -122,10 +122,9 @@ func (d *doc) getClosures() ([]*Closure, error) {
 				ClosureType:     closureType,
 				Date:            dateString,
 				RawTimeRange:    rawTimeRangeWithZone,
-				TimeStart:       startDate.Unix(),
-				TimeEnd:         endDate.Unix(),
 				TimeRangeStatus: timeRangeStatus,
 				ClosureStatus:   closureStatus,
+				Expires:         endDate.Add(2 * time.Hour).Unix(),
 			},
 		)
 	}

@@ -3,7 +3,6 @@ package db
 import (
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -14,10 +13,7 @@ func buildPutInput(tablename string, c *closures.Closure) *dynamodb.PutItemInput
 	input := &dynamodb.PutItemInput{
 		Item: map[string]*dynamodb.AttributeValue{
 			"ClosureType": {
-				S: aws.String(c.ClosureType),
-			},
-			"ClosureTypeSort": {
-				S: aws.String(c.ClosureType + "#" + c.TimeType), // Primary Date#start, Primary Date#end
+				S: aws.String(string(c.ClosureType)),
 			},
 			"Date": {
 				S: aws.String(c.Date),
@@ -25,34 +21,27 @@ func buildPutInput(tablename string, c *closures.Closure) *dynamodb.PutItemInput
 			"RawTimeRange": {
 				S: aws.String(c.RawTimeRange),
 			},
-			"Time": {
-				N: aws.String(fmt.Sprint(c.Time)),
+			"TimeRangeStatus": {
+				S: aws.String(string(c.TimeRangeStatus)),
 			},
-			"TimeType": {
-				S: aws.String(c.TimeType),
-			},
-			"Status": {
-				S: aws.String(c.Status),
+			"ClosureStatus": {
+				S: aws.String(string(c.ClosureStatus)),
 			},
 		},
 		ReturnConsumedCapacity: aws.String("TOTAL"),
 		TableName:              aws.String(tablename),
 		ReturnValues:           aws.String("ALL_OLD"),
 		// Only overwrite existing if something has changed
-		ConditionExpression: aws.String("#Status <> :status OR #Time <> :time OR ClosureType <> :type OR RawTimeRange <> :rawTimeRange"), // nolint
-		ExpressionAttributeNames: map[string]*string{
-			"#Status": aws.String("Status"),
-			"#Time":   aws.String("Time"),
-		},
+		ConditionExpression: aws.String("ClosureStatus <> :closureStatus OR TimeRangeStatus <> :timeRangeStatus OR ClosureType <> :type OR RawTimeRange <> :rawTimeRange"), // nolint
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":status": {
-				S: aws.String(c.Status),
+			":closureStatus": {
+				S: aws.String(string(c.ClosureStatus)),
 			},
-			":time": {
-				N: aws.String(fmt.Sprint(c.Time)),
+			":timeRangeStatus": {
+				S: aws.String(string(c.TimeRangeStatus)),
 			},
 			":type": {
-				S: aws.String(c.ClosureType),
+				S: aws.String(string(c.ClosureType)),
 			},
 			":rawTimeRange": {
 				S: aws.String(c.RawTimeRange),
@@ -70,8 +59,8 @@ func buildDeleteInput(tablename string, c *closures.Closure) *dynamodb.DeleteIte
 			"Date": {
 				S: aws.String(c.Date),
 			},
-			"ClosureTypeSort": {
-				S: aws.String(c.ClosureType + "#" + c.TimeType), // Primary Date#start, Primary Date#end
+			"ClosureType": {
+				S: aws.String(string(c.ClosureType)),
 			},
 		},
 		ReturnConsumedCapacity: aws.String("TOTAL"),
@@ -80,15 +69,16 @@ func buildDeleteInput(tablename string, c *closures.Closure) *dynamodb.DeleteIte
 	return input
 }
 
+/*
+// filters results to only closures that have an ending time older than input time
 func buildTimeQueryInput(tablename string, t time.Time) *dynamodb.QueryInput {
 	input := &dynamodb.QueryInput{
 		ReturnConsumedCapacity: aws.String("TOTAL"),
 		TableName:              aws.String(tablename),
 		KeyConditionExpression: aws.String("#Date = :date"),
-		FilterExpression:       aws.String("#Time <= :time"),
+		FilterExpression:       aws.String("TimeEnd <= :time"),
 		ExpressionAttributeNames: map[string]*string{
 			"#Date": aws.String("Date"),
-			"#Time": aws.String("Time"),
 		},
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":date": {
@@ -102,30 +92,31 @@ func buildTimeQueryInput(tablename string, t time.Time) *dynamodb.QueryInput {
 
 	return input
 }
+*/
 
 func buildClosure(attributes map[string]*dynamodb.AttributeValue) (*closures.Closure, error) {
 	if attributes == nil {
 		return nil, nil
 	}
 
-	ct := aws.StringValue(attributes["ClosureType"].S)
+	closureType := closures.ClosureType(aws.StringValue(attributes["ClosureType"].S))
 	date := aws.StringValue(attributes["Date"].S)
 	rawTimeRange := aws.StringValue(attributes["RawTimeRange"].S)
-	timeString := aws.StringValue(attributes["Time"].N)
-	timestamp, err := strconv.ParseInt(timeString, 10, 64)
+	timeRangeStatus := closures.TimeRangeStatus(aws.StringValue(attributes["TimeRangeStatus"].S))
+	closureStatus := closures.ClosureStatus(aws.StringValue(attributes["ClosureStatus"].S))
+	expiresString := aws.StringValue(attributes["Expires"].N)
+	expires, err := strconv.ParseInt(expiresString, 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("problem parsing 'Time' attribute: %v", err)
+		return nil, fmt.Errorf("problem parsing 'Expires' attribute: %v", err)
 	}
-	timeType := aws.StringValue(attributes["TimeType"].S)
-	status := aws.StringValue(attributes["Status"].S)
 
 	c := &closures.Closure{
-		ClosureType:  ct,
-		Date:         date,
-		RawTimeRange: rawTimeRange,
-		Time:         timestamp,
-		TimeType:     timeType,
-		Status:       status,
+		ClosureType:     closureType,
+		Date:            date,
+		RawTimeRange:    rawTimeRange,
+		TimeRangeStatus: timeRangeStatus,
+		ClosureStatus:   closureStatus,
+		Expires:         expires,
 	}
 
 	return c, nil

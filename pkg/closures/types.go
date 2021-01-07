@@ -23,10 +23,9 @@ type Closure struct {
 	ClosureType     ClosureType
 	Date            string
 	RawTimeRange    string
-	TimeStart       int64
-	TimeEnd         int64
 	TimeRangeStatus TimeRangeStatus
 	ClosureStatus   ClosureStatus
+	Expires         int64
 }
 
 func (c Closure) String() string {

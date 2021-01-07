@@ -48,8 +48,6 @@ func TestGet(t *testing.T) {
 					ClosureStatus:   ClosureStatusScheduled,
 					ClosureType:     ClosureTypePrimary,
 					TimeRangeStatus: TimeRangeStatusExpired,
-					TimeStart:       1609164000,
-					TimeEnd:         1609203600,
 				},
 				{
 					Date:            "Tuesday, Dec 29, 2020",
@@ -57,8 +55,6 @@ func TestGet(t *testing.T) {
 					ClosureStatus:   ClosureStatusCancelled,
 					ClosureType:     ClosureTypeSecondary,
 					TimeRangeStatus: TimeRangeStatusExpired,
-					TimeStart:       1609250400,
-					TimeEnd:         1609281000,
 				},
 			},
 			httpmock.NewBytesResponder(200, mockSite),
