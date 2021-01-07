@@ -8,16 +8,27 @@ import (
 
 type doc goquery.Document
 
+// TimeRangeStatus notates the status of a closure time range relative to current time: pending,
+// active, or expired.
+type TimeRangeStatus string
+
+// ClosureStatus represents the official status of the closure as reported on https://www.cameroncounty.us/spacex/.
+type ClosureStatus string
+
+// ClosureType represents the type of Closure reported.
+type ClosureType string
+
 // Closure represents a beach and/or road closure notice from the Cameron County SpaceX site.
 type Closure struct {
-	ClosureType  string
-	Date         string
-	RawTimeRange string
-	Time         int64
-	TimeType     string
-	Status       string
+	ClosureType     ClosureType
+	Date            string
+	RawTimeRange    string
+	TimeStart       int64
+	TimeEnd         int64
+	TimeRangeStatus TimeRangeStatus
+	ClosureStatus   ClosureStatus
 }
 
 func (c Closure) String() string {
-	return fmt.Sprintf("%s - %s (%s)", c.Date, c.RawTimeRange, c.TimeType)
+	return fmt.Sprintf("%s - %s", c.Date, c.RawTimeRange)
 }
