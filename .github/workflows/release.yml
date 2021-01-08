@@ -17,9 +17,9 @@ jobs:
           path: |
             ~/go/pkg/mod
             node_modules
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum', '**/package-lock.json') }}
+          key: ${{ runner.os }}-go-2-${{ hashFiles('**/go.sum', '**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-go-
+            ${{ runner.os }}-go-2
       # - name: Get branch name
       #   run: echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
       - name: Setup Node
