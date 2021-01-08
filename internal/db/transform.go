@@ -27,6 +27,9 @@ func buildPutInput(tablename string, c *closures.Closure) *dynamodb.PutItemInput
 			"ClosureStatus": {
 				S: aws.String(string(c.ClosureStatus)),
 			},
+			"Expires": {
+				N: aws.String(fmt.Sprint(c.Expires)),
+			},
 		},
 		ReturnConsumedCapacity: aws.String("TOTAL"),
 		TableName:              aws.String(tablename),
@@ -51,48 +54,6 @@ func buildPutInput(tablename string, c *closures.Closure) *dynamodb.PutItemInput
 
 	return input
 }
-
-func buildDeleteInput(tablename string, c *closures.Closure) *dynamodb.DeleteItemInput {
-	input := &dynamodb.DeleteItemInput{
-		TableName: aws.String(tablename),
-		Key: map[string]*dynamodb.AttributeValue{
-			"Date": {
-				S: aws.String(c.Date),
-			},
-			"ClosureType": {
-				S: aws.String(string(c.ClosureType)),
-			},
-		},
-		ReturnConsumedCapacity: aws.String("TOTAL"),
-	}
-
-	return input
-}
-
-/*
-// filters results to only closures that have an ending time older than input time
-func buildTimeQueryInput(tablename string, t time.Time) *dynamodb.QueryInput {
-	input := &dynamodb.QueryInput{
-		ReturnConsumedCapacity: aws.String("TOTAL"),
-		TableName:              aws.String(tablename),
-		KeyConditionExpression: aws.String("#Date = :date"),
-		FilterExpression:       aws.String("TimeEnd <= :time"),
-		ExpressionAttributeNames: map[string]*string{
-			"#Date": aws.String("Date"),
-		},
-		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":date": {
-				S: aws.String(t.Format(closures.DateLayout)),
-			},
-			":time": {
-				N: aws.String(fmt.Sprint(t.Unix())),
-			},
-		},
-	}
-
-	return input
-}
-*/
 
 func buildClosure(attributes map[string]*dynamodb.AttributeValue) (*closures.Closure, error) {
 	if attributes == nil {

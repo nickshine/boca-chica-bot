@@ -8,7 +8,7 @@ import (
 )
 
 func handleDiscord(params map[string]string, messages []string) error {
-	session, err := getSession(params["discord_bot_token"])
+	session, err := getDiscordSession(params["discord_bot_token"])
 	if err != nil {
 		return err
 	}
@@ -22,7 +22,7 @@ func handleDiscord(params map[string]string, messages []string) error {
 	// TODO: handle more than 100 servers
 	guilds, err := session.UserGuilds(100, "", "")
 	if err != nil {
-		return err
+		return fmt.Errorf("problem retrieving discord servers: %v", err)
 	}
 
 	for _, g := range guilds {
@@ -49,8 +49,8 @@ func handleDiscord(params map[string]string, messages []string) error {
 	return nil
 }
 
-// GetSession returns a discord session given proper credentials.
-func getSession(token string) (*discordgo.Session, error) {
+// getDiscordSession returns a discord session given proper credentials.
+func getDiscordSession(token string) (*discordgo.Session, error) {
 	if token == "" {
 		return nil, errors.New("discord bot token required")
 	}

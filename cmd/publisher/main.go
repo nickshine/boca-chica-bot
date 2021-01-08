@@ -75,7 +75,7 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 			oldTimeRangeStatus := closures.TimeRangeStatus(record.Change.OldImage["TimeRangeStatus"].String())
 			oldClosureStatus := closures.ClosureStatus(record.Change.OldImage["ClosureStatus"].String())
 
-			if timeRangeStatus != oldTimeRangeStatus {
+			if timeRangeStatus != oldTimeRangeStatus && closureStatus != closures.ClosureStatusCancelled {
 				switch timeRangeStatus {
 				case closures.TimeRangeStatusActive:
 					messages = append(messages, fmt.Sprintf("Closure for %s - %s has started.\n%s",
@@ -84,7 +84,7 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 					messages = append(messages, fmt.Sprintf("Closure for %s - %s has ended.\n%s",
 						date, rawTimeRange, closures.SiteURL))
 				}
-			} else if rawTimeRange != oldRawTimeRange {
+			} else if rawTimeRange != oldRawTimeRange && closureStatus != closures.ClosureStatusCancelled {
 				messages = append(messages, fmt.Sprintf("Time window for the %s - %s closure has changed to %s.\n%s",
 					date, oldRawTimeRange, rawTimeRange, closures.SiteURL))
 			} else if closureStatus != oldClosureStatus {
