@@ -24,24 +24,27 @@ func handleDiscord(params map[string]string, messages []string) error {
 	if err != nil {
 		return fmt.Errorf("problem retrieving discord servers: %v", err)
 	}
+	log.Debugf("guild server count: %d", len(guilds))
 
 	for _, g := range guilds {
+		log.Debugf("processing guild server: %s", g.Name)
 		channels, err := session.GuildChannels(g.ID)
 		if err != nil {
 			log.Debugf("channel retrieval error: %v", err)
-			continue
 		}
 
 		for _, ch := range channels {
 			if ch.Type == discordgo.ChannelTypeGuildText {
 				log.Debugf("Guild name: %s - Channel: %s", g.Name, ch.Name)
 				for _, m := range messages {
+					log.Debugf("sending message: %s", m)
 					msg, err := session.ChannelMessageSend(ch.ID, m)
 					if err != nil {
 						log.Debugf("channel send error: %v", err)
-						continue
 					}
-					log.Debugf("msg: %+v", msg)
+					if msg != nil {
+						log.Debugf("Discord response: %+v", msg)
+					}
 				}
 			}
 		}
