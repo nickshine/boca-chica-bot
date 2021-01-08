@@ -1,3 +1,10 @@
+## [1.2.5](https://github.com/nickshine/boca-chica-bot/compare/v1.2.4...v1.2.5) (2021-01-08)
+
+
+### Bug Fixes
+
+* increase publisher function timeout ([493e206](https://github.com/nickshine/boca-chica-bot/commit/493e20688a20c42394b9b460125697c3e24cdb6d))
+
 ## [1.2.4](https://github.com/nickshine/boca-chica-bot/compare/v1.2.3...v1.2.4) (2021-01-05)
 
 
