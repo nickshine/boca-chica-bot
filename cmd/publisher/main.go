@@ -7,9 +7,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/nickshine/boca-chica-bot/internal/discord"
 	"github.com/nickshine/boca-chica-bot/internal/param"
-	"github.com/nickshine/boca-chica-bot/internal/twitter"
 	"github.com/nickshine/boca-chica-bot/pkg/closures"
 	"go.uber.org/zap"
 )
@@ -57,56 +55,44 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 		closureType := image["ClosureType"].String()
 		date := image["Date"].String()
 		rawTimeRange := image["RawTimeRange"].String()
-		timeType := image["TimeType"].String()
-		status := image["Status"].String()
+		timeRangeStatus := closures.TimeRangeStatus(image["TimeRangeStatus"].String())
+		closureStatus := closures.ClosureStatus(image["ClosureStatus"].String())
 
 		switch record.EventName {
-		// An INSERT event means a new Closure has been added
+		// An INSERT event means a new Closure has been added.
 		case string(events.DynamoDBOperationTypeInsert):
-			// Each closure has two entries, a 'start' type and 'end' type.  Only tweet a new closure once (on 'start' type).
-			if timeType == closures.TimeTypeEnd {
-				log.Debugf("Closure TimeType of '%s' on 'INSERT', skipping publish", timeType)
-				return nil
-			} else if status == closures.CancelledStatus {
-				log.Debugf("Closure Status of '%s' on 'INSERT', skipping publish", status)
+			if closureStatus == closures.ClosureStatusCancelled {
+				log.Debugf("Closure Status of '%s' on 'INSERT', skipping publish", closureStatus)
 				return nil
 			}
 
 			messages = append(messages, fmt.Sprintf("New closure scheduled:\n%s - %s - %s\n%s",
 				closureType, date, rawTimeRange, closures.SiteURL))
+		// A MODIFY event means an existing Closure has been changed.
 		case string(events.DynamoDBOperationTypeModify):
 
-			// Each closure has two entries, a 'start' type and 'end' type.  Only tweet a closure update once (on 'start' type).
-			if timeType == closures.TimeTypeEnd {
-				log.Debugf("Closure TimeType of '%s' on 'MODIFY', skipping publish", timeType)
-				return nil
-			}
-
 			oldRawTimeRange := record.Change.OldImage["RawTimeRange"].String()
-			oldStatus := record.Change.OldImage["Status"].String()
+			oldTimeRangeStatus := closures.TimeRangeStatus(record.Change.OldImage["TimeRangeStatus"].String())
+			oldClosureStatus := closures.ClosureStatus(record.Change.OldImage["ClosureStatus"].String())
 
-			if status != oldStatus {
-				messages = append(messages, fmt.Sprintf("Status change for the %s closure: %s.\n%s",
-					date, status, closures.SiteURL))
-			} else if rawTimeRange != oldRawTimeRange {
+			if timeRangeStatus != oldTimeRangeStatus && closureStatus != closures.ClosureStatusCancelled {
+				switch timeRangeStatus {
+				case closures.TimeRangeStatusActive:
+					messages = append(messages, fmt.Sprintf("Closure for %s - %s has started.\n%s",
+						date, rawTimeRange, closures.SiteURL))
+				case closures.TimeRangeStatusExpired:
+					messages = append(messages, fmt.Sprintf("Closure for %s - %s has ended.\n%s",
+						date, rawTimeRange, closures.SiteURL))
+				}
+			} else if rawTimeRange != oldRawTimeRange && closureStatus != closures.ClosureStatusCancelled {
 				messages = append(messages, fmt.Sprintf("Time window for the %s - %s closure has changed to %s.\n%s",
 					date, oldRawTimeRange, rawTimeRange, closures.SiteURL))
+			} else if closureStatus != oldClosureStatus {
+				messages = append(messages, fmt.Sprintf("Status change for the %s closure: %s.\n%s",
+					date, closureStatus, closures.SiteURL))
 			} else {
 				messages = append(messages, fmt.Sprintf("Closure status change:\n%s - %s - %s\n%s",
-					date, rawTimeRange, status, closures.SiteURL))
-			}
-		// A REMOVE event means the closure has expired (time range started or ended)
-		case string(events.DynamoDBOperationTypeRemove):
-			if status != closures.ScheduledStatus {
-				log.Debugf("Closure Status of '%s' on 'REMOVE', skipping publish", status)
-				return nil
-			}
-			if timeType == closures.TimeTypeStart {
-				messages = append(messages, fmt.Sprintf("Closure for %s - %s has started.\n%s",
-					date, rawTimeRange, closures.SiteURL))
-			} else if timeType == closures.TimeTypeEnd {
-				messages = append(messages, fmt.Sprintf("Closure for %s - %s has ended.\n%s",
-					date, rawTimeRange, closures.SiteURL))
+					date, rawTimeRange, closureStatus, closures.SiteURL))
 			}
 		}
 	}
@@ -114,7 +100,7 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 	if len(messages) == 0 {
 		return nil
 	} else if disable := os.Getenv("DISABLE_PUBLISH"); disable != "" && disable != "false" {
-		log.Debugf("DISABLE_PUBLISH env var enabled, skipping publishing of tweets: %v", messages)
+		log.Debugf("DISABLE_PUBLISH env var enabled, skipping publishing: %v", messages)
 		return nil
 	}
 
@@ -129,57 +115,8 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 		log.Info(err)
 	}
 	err = handleDiscord(params, messages)
-	return err
-}
-
-func handleDiscord(params map[string]string, messages []string) error {
-	c := &discord.Credentials{
-		Token: params["discord_bot_token"],
-	}
-
-	discordSession, err := discord.GetSession(c)
 	if err != nil {
-		return err
-	}
-
-	errors := discordSession.Send(messages)
-	log.Debug("Discord notification sent")
-	for _, e := range errors {
-		switch v := e.(type) {
-		case *discord.ChannelMessageSendError:
-			log.Debug(v)
-		default:
-			log.Error(e)
-		}
-	}
-
-	return nil
-}
-
-func handleTweets(params map[string]string, messages []string) error {
-	c := &twitter.Credentials{
-		ConsumerKey:    params["twitter_consumer_key"],
-		ConsumerSecret: params["twitter_consumer_secret"],
-		AccessToken:    params["twitter_access_token"],
-		AccessSecret:   params["twitter_access_secret"],
-	}
-
-	client, err := twitter.GetClient(c)
-	if err != nil {
-		return fmt.Errorf("error getting twitter client: %v", err)
-	}
-
-	// log.Debug(client.Verify())
-
-	for _, t := range messages {
-		log.Debugf("Tweet length: %d\n", len(t))
-		log.Infof("Tweeting: %s\n", t)
-		createdAt, err := client.Tweet(t + "\n#spacex #starship")
-		if err != nil {
-			log.Info(err)
-		}
-		log.Debugf("Tweet created at %q", createdAt)
-
+		log.Info(err)
 	}
 	return nil
 }

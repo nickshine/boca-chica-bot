@@ -13,20 +13,29 @@ import (
 )
 
 const (
-	// CancelledStatus represents the cancelled Boca Chica Beach status display text.
-	CancelledStatus = "Closure Cancelled"
-
-	// ScheduledStatus represents the scheduled Boca Chica Beach status display text.
-	ScheduledStatus = "Closure Scheduled"
-
-	// TimeTypeStart represents a Closure's beginning time in a posted time range.
-	TimeTypeStart = "start"
-
-	// TimeTypeEnd represents a Closure's ending time in a posted time range.
-	TimeTypeEnd = "end"
-
 	// SiteURL is the website publishing the Boca Chica Beach and Road closures.
 	SiteURL = "https://www.cameroncounty.us/spacex/"
+
+	// ClosureTypePrimary represents a primary closure.
+	ClosureTypePrimary ClosureType = "Primary Date"
+
+	// ClosureTypeSecondary represents a secondary (backup) closure.
+	ClosureTypeSecondary ClosureType = "Secondary Date"
+
+	// ClosureStatusCancelled represents the cancelled Boca Chica Beach status display text.
+	ClosureStatusCancelled ClosureStatus = "Closure Cancelled"
+
+	// ClosureStatusScheduled represents the scheduled Boca Chica Beach status display text.
+	ClosureStatusScheduled ClosureStatus = "Closure Scheduled"
+
+	// TimeRangeStatusActive notates when the current time is within a closure time range.
+	TimeRangeStatusActive TimeRangeStatus = "active"
+
+	// TimeRangeStatusPending notates when the current time is before a closure time range.
+	TimeRangeStatusPending TimeRangeStatus = "pending"
+
+	// TimeRangeStatusExpired notates when the current time is after a closure time range.
+	TimeRangeStatusExpired TimeRangeStatus = "expired"
 
 	// DateLayout represents the current date layout posted for each Closure.
 	DateLayout = "Monday, Jan 2, 2006"
@@ -73,7 +82,7 @@ func (d *doc) getClosures() ([]*Closure, error) {
 			return nil, fmt.Errorf("table format changed: row does not have 4 cells: cell count: %d", cells.Length())
 		}
 
-		closureType := strings.TrimSpace(cells.Get(0).FirstChild.Data)
+		closureType := ClosureType(strings.TrimSpace(cells.Get(0).FirstChild.Data))
 		dateString := strings.TrimSpace(cells.Get(1).FirstChild.Data)
 		date, err := time.Parse(DateLayout, dateString)
 		if err != nil {
@@ -91,28 +100,31 @@ func (d *doc) getClosures() ([]*Closure, error) {
 		startDate := time.Date(date.Year(), date.Month(), date.Day(), startTime.Hour(), startTime.Minute(), 0, 0, location)
 		endDate := time.Date(date.Year(), date.Month(), date.Day(), endTime.Hour(), endTime.Minute(), 0, 0, location)
 
-		status := strings.TrimSpace(cells.Get(3).FirstChild.Data)
+		closureStatus := ClosureStatus(strings.TrimSpace(cells.Get(3).FirstChild.Data))
 
 		zone, _ := startDate.Zone()
 		rawTimeRangeWithZone := fmt.Sprintf("%s (%s)", rawTimeRange, zone)
 
+		var timeRangeStatus TimeRangeStatus
+		// give a little leeway on 'active' status since lambda schedule starts at 8am CST, which is
+		// one of the usual closure start times.
+		if time.Now().Add(30 * time.Second).Before(startDate) {
+			timeRangeStatus = TimeRangeStatusPending
+		} else if time.Now().Before(endDate) {
+			timeRangeStatus = TimeRangeStatusActive
+		} else {
+			timeRangeStatus = TimeRangeStatusExpired
+		}
+
 		// create a Closure for the start and end of the time range
 		closures = append(closures,
 			&Closure{
-				ClosureType:  closureType,
-				Date:         dateString,
-				RawTimeRange: rawTimeRangeWithZone,
-				Time:         startDate.Unix(),
-				TimeType:     TimeTypeStart,
-				Status:       status,
-			},
-			&Closure{
-				ClosureType:  closureType,
-				Date:         dateString,
-				RawTimeRange: rawTimeRangeWithZone,
-				Time:         endDate.Unix(),
-				TimeType:     TimeTypeEnd,
-				Status:       status,
+				ClosureType:     closureType,
+				Date:            dateString,
+				RawTimeRange:    rawTimeRangeWithZone,
+				TimeRangeStatus: timeRangeStatus,
+				ClosureStatus:   closureStatus,
+				Expires:         endDate.Add(2 * time.Hour).Unix(),
 			},
 		)
 	}
@@ -120,7 +132,9 @@ func (d *doc) getClosures() ([]*Closure, error) {
 	return closures, nil
 }
 
-// timeRange format: "9:00 am to 9:00 pm"
+// parseTimeRange parses a string with two times in the format "9:00 am to 9:00 pm".
+//
+// A start and end Time struct is returned, or an error.
 func parseTimeRange(timeRange string) (*time.Time, *time.Time, error) {
 	times := strings.Split(timeRange, "to")
 
@@ -132,6 +146,7 @@ func parseTimeRange(timeRange string) (*time.Time, *time.Time, error) {
 	if err != nil {
 		return nil, nil, err
 	}
+
 	end, err := time.Parse(timeLayout, strings.TrimSpace(times[1]))
 	if err != nil {
 		return nil, nil, err

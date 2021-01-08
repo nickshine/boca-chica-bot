@@ -90,6 +90,7 @@ resource "aws_lambda_function" "publisher_lambda" {
   role          = aws_iam_role.lambda-exec.arn
   handler       = "${var.app}-publisher"
   publish       = true
+  timeout       = 60
 
   source_code_hash = filebase64sha256("${path.root}/lambda/publisher-lambda.zip")
   runtime          = "go1.x"
