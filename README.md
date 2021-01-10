@@ -7,7 +7,7 @@ Starship testing][cameron-county-spacex] in Boca Chica, TX.
 [![discord-invite-badge]][bocachicabot-discord-invite] <sup>see [Discord Installation](#discord-installation) below</sup>
 
 <p align="center">
-<img width="500" src="assets/boca-chica-bot.jpg">
+<img width="500" src="assets/bocachicabot.jpg">
 </p>
 
 ![go-version-badge]
