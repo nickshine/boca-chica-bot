@@ -53,7 +53,7 @@ func TestGet(t *testing.T) {
 				{
 					Date:            "Tuesday, Dec 29, 2020",
 					RawTimeRange:    "8:00 am to 4:30 pm (CST)",
-					ClosureStatus:   ClosureStatusCancelled,
+					ClosureStatus:   ClosureStatusCanceled,
 					ClosureType:     ClosureTypeSecondary,
 					TimeRangeStatus: TimeRangeStatusExpired,
 					Expires:         1609288200,
