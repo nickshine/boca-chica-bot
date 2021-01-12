@@ -26,6 +26,8 @@ func handleDiscord(params map[string]string, messages []string) error {
 	}
 	log.Debugf("guild server count: %d", len(guilds))
 
+	log.Debugf("messages to send: %s", messages)
+
 	for _, g := range guilds {
 		channels, err := session.GuildChannels(g.ID)
 		if err != nil {
@@ -34,9 +36,8 @@ func handleDiscord(params map[string]string, messages []string) error {
 
 		for _, ch := range channels {
 			if ch.Type == discordgo.ChannelTypeGuildText {
-				log.Debugf("Guild name: %s - Channel: %s", g.Name, ch.Name)
+				log.Debugf("sending messages to Guild name: %s - Channel: %s", g.Name, ch.Name)
 				for _, m := range messages {
-					log.Debugf("sending message: %s", m)
 					_, err := session.ChannelMessageSend(ch.ID, m)
 					if err != nil {
 						log.Debugf("channel send error: %v", err)
