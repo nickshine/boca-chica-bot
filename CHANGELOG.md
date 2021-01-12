@@ -1,3 +1,10 @@
+## [1.2.6](https://github.com/nickshine/boca-chica-bot/compare/v1.2.5...v1.2.6) (2021-01-12)
+
+
+### Bug Fixes
+
+* use american spelling for canceled ([a5a95d1](https://github.com/nickshine/boca-chica-bot/commit/a5a95d1c0ae4e9aca5a9ca3bf59299bc758a90de))
+
 ## [1.2.5](https://github.com/nickshine/boca-chica-bot/compare/v1.2.4...v1.2.5) (2021-01-08)
 
 
