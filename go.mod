@@ -3,7 +3,7 @@ module github.com/nickshine/boca-chica-bot
 go 1.15
 
 require (
-	github.com/PuerkitoBio/goquery v1.6.0
+	github.com/PuerkitoBio/goquery v1.6.1
 	github.com/aws/aws-lambda-go v1.22.0
 	github.com/aws/aws-sdk-go v1.36.23
 	github.com/bwmarrin/discordgo v0.22.0
