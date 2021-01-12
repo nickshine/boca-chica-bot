@@ -61,7 +61,7 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 		switch record.EventName {
 		// An INSERT event means a new Closure has been added.
 		case string(events.DynamoDBOperationTypeInsert):
-			if closureStatus == closures.ClosureStatusCancelled {
+			if closureStatus == closures.ClosureStatusCanceled {
 				log.Debugf("Closure Status of '%s' on 'INSERT', skipping publish", closureStatus)
 				return nil
 			}
@@ -75,7 +75,7 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 			oldTimeRangeStatus := closures.TimeRangeStatus(record.Change.OldImage["TimeRangeStatus"].String())
 			oldClosureStatus := closures.ClosureStatus(record.Change.OldImage["ClosureStatus"].String())
 
-			if timeRangeStatus != oldTimeRangeStatus && closureStatus != closures.ClosureStatusCancelled {
+			if timeRangeStatus != oldTimeRangeStatus && closureStatus != closures.ClosureStatusCanceled {
 				switch timeRangeStatus {
 				case closures.TimeRangeStatusActive:
 					messages = append(messages, fmt.Sprintf("Closure for %s - %s has started.\n%s",
@@ -84,7 +84,7 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 					messages = append(messages, fmt.Sprintf("Closure for %s - %s has ended.\n%s",
 						date, rawTimeRange, closures.SiteURL))
 				}
-			} else if rawTimeRange != oldRawTimeRange && closureStatus != closures.ClosureStatusCancelled {
+			} else if rawTimeRange != oldRawTimeRange && closureStatus != closures.ClosureStatusCanceled {
 				messages = append(messages, fmt.Sprintf("Time window for the %s - %s closure has changed to %s.\n%s",
 					date, oldRawTimeRange, rawTimeRange, closures.SiteURL))
 			} else if closureStatus != oldClosureStatus {

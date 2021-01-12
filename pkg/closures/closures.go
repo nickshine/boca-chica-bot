@@ -22,8 +22,8 @@ const (
 	// ClosureTypeSecondary represents a secondary (backup) closure.
 	ClosureTypeSecondary ClosureType = "Secondary Date"
 
-	// ClosureStatusCancelled represents the cancelled Boca Chica Beach status display text.
-	ClosureStatusCancelled ClosureStatus = "Closure Cancelled"
+	// ClosureStatusCanceled represents the canceled Boca Chica Beach status display text.
+	ClosureStatusCanceled ClosureStatus = "Closure Canceled"
 
 	// ClosureStatusScheduled represents the scheduled Boca Chica Beach status display text.
 	ClosureStatusScheduled ClosureStatus = "Closure Scheduled"
