@@ -1,3 +1,10 @@
+## [1.2.8](https://github.com/nickshine/boca-chica-bot/compare/v1.2.7...v1.2.8) (2021-01-14)
+
+
+### Bug Fixes
+
+* account for closures that were already canceled during a time status change ([e7083de](https://github.com/nickshine/boca-chica-bot/commit/e7083de3d70018018cc0804a3f62b8650b7bd0dc))
+
 ## [1.2.7](https://github.com/nickshine/boca-chica-bot/compare/v1.2.6...v1.2.7) (2021-01-14)
 
 
