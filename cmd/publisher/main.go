@@ -75,7 +75,10 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 			oldTimeRangeStatus := closures.TimeRangeStatus(record.Change.OldImage["TimeRangeStatus"].String())
 			oldClosureStatus := closures.ClosureStatus(record.Change.OldImage["ClosureStatus"].String())
 
-			if timeRangeStatus != oldTimeRangeStatus && closureStatus != closures.ClosureStatusCanceled {
+			if closureStatus == oldClosureStatus && closureStatus == closures.ClosureStatusCanceled {
+				log.Debugf("Closure is cancelled, skipping publish")
+				return nil
+			} else if timeRangeStatus != oldTimeRangeStatus && closureStatus != closures.ClosureStatusCanceled {
 				switch timeRangeStatus {
 				case closures.TimeRangeStatusActive:
 					messages = append(messages, fmt.Sprintf("Closure for %s - %s has started.\n%s",
