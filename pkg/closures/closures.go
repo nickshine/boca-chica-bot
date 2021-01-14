@@ -39,6 +39,9 @@ const (
 
 	// DateLayout represents the current date layout posted for each Closure.
 	DateLayout = "Monday, Jan 2, 2006"
+
+	// DateLayoutAlt represents an alternative date layout sometimes used on the site.
+	DateLayoutAlt = "Monday, January 2, 2006"
 )
 
 const (
@@ -84,9 +87,14 @@ func (d *doc) getClosures() ([]*Closure, error) {
 
 		closureType := ClosureType(strings.TrimSpace(cells.Get(0).FirstChild.Data))
 		dateString := strings.TrimSpace(cells.Get(1).FirstChild.Data)
-		date, err := time.Parse(DateLayout, dateString)
+		var date time.Time
+		date, err = time.Parse(DateLayout, dateString)
 		if err != nil {
-			return nil, fmt.Errorf("date format changed from 'Monday, Jan 2, 2006' to '%s'", cells.Get(1).FirstChild.Data)
+			// try alternative layout
+			date, err = time.Parse(DateLayoutAlt, dateString)
+			if err != nil {
+				return nil, fmt.Errorf("date format changed from 'Monday, Jan 2, 2006' to '%s'", cells.Get(1).FirstChild.Data)
+			}
 		}
 
 		// reset dateString to formated 'Monday, Jan 2, 2006' for primary key consistency
