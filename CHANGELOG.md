@@ -1,3 +1,10 @@
+## [1.2.7](https://github.com/nickshine/boca-chica-bot/compare/v1.2.6...v1.2.7) (2021-01-14)
+
+
+### Bug Fixes
+
+* account for mismatched date layouts ([7a56ec7](https://github.com/nickshine/boca-chica-bot/commit/7a56ec72037d0ba6c83c1e62d11463c7ba608f56))
+
 ## [1.2.6](https://github.com/nickshine/boca-chica-bot/compare/v1.2.5...v1.2.6) (2021-01-12)
 
 
