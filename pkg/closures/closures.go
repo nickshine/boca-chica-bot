@@ -42,6 +42,9 @@ const (
 
 	// DateLayoutAlt represents an alternative date layout sometimes used on the site.
 	DateLayoutAlt = "Monday, January 2, 2006"
+
+	// DateLayoutSimple is a date layout without the weekday.
+	DateLayoutSimple = "Jan 2, 2006"
 )
 
 const (
@@ -93,7 +96,19 @@ func (d *doc) getClosures() ([]*Closure, error) {
 			// try alternative layout
 			date, err = time.Parse(DateLayoutAlt, dateString)
 			if err != nil {
-				return nil, fmt.Errorf("date format changed from 'Monday, Jan 2, 2006' to '%s'", cells.Get(1).FirstChild.Data)
+				// try handling misspelled weekday
+				parts := strings.Split(dateString, ",")
+				if len(parts) == 3 {
+					dateString = strings.TrimSpace(strings.Join(parts[1:], ","))
+					date, err = time.Parse(DateLayoutSimple, dateString)
+					if err != nil {
+						// skip malformed closure
+						continue
+					}
+				} else {
+					// skip malformed closure
+					continue
+				}
 			}
 		}
 
