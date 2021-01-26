@@ -1,3 +1,10 @@
+## [1.2.9](https://github.com/nickshine/boca-chica-bot/compare/v1.2.8...v1.2.9) (2021-01-26)
+
+
+### Bug Fixes
+
+* allow for misspelled weekdays and gracefully skip unparsable closures ([3532c59](https://github.com/nickshine/boca-chica-bot/commit/3532c59268c42c67adfb6a548bea592e7c0ad71e))
+
 ## [1.2.8](https://github.com/nickshine/boca-chica-bot/compare/v1.2.7...v1.2.8) (2021-01-14)
 
 
