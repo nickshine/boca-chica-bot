@@ -138,3 +138,40 @@ func TestScrapeClosuresSite(t *testing.T) {
 		httpmock.Reset()
 	}
 }
+
+func TestIsCanceled(t *testing.T) {
+	tests := []struct {
+		name     string
+		closure  *Closure
+		expected bool
+	}{
+		{
+			"Scheduled",
+			&Closure{
+				ClosureStatus: ClosureStatusScheduled,
+			},
+			false,
+		},
+		{
+			"Canceled",
+			&Closure{
+				ClosureStatus: ClosureStatusCanceled,
+			},
+			true,
+		},
+		{
+			"Cancelled",
+			&Closure{
+				ClosureStatus: "Status Cancelled",
+			},
+			true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			actual := IsCanceled(tt.closure.ClosureStatus)
+			assert.Equal(t, actual, tt.expected)
+		})
+	}
+}
