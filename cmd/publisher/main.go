@@ -57,11 +57,12 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 		rawTimeRange := image["RawTimeRange"].String()
 		timeRangeStatus := closures.TimeRangeStatus(image["TimeRangeStatus"].String())
 		closureStatus := closures.ClosureStatus(image["ClosureStatus"].String())
+		isCanceled := closures.IsCanceled(closureStatus)
 
 		switch record.EventName {
 		// An INSERT event means a new Closure has been added.
 		case string(events.DynamoDBOperationTypeInsert):
-			if closureStatus == closures.ClosureStatusCanceled {
+			if isCanceled {
 				log.Debugf("Closure Status of '%s' on 'INSERT', skipping publish", closureStatus)
 				return nil
 			}
@@ -75,10 +76,10 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 			oldTimeRangeStatus := closures.TimeRangeStatus(record.Change.OldImage["TimeRangeStatus"].String())
 			oldClosureStatus := closures.ClosureStatus(record.Change.OldImage["ClosureStatus"].String())
 
-			if closureStatus == oldClosureStatus && closureStatus == closures.ClosureStatusCanceled {
+			if closureStatus == oldClosureStatus && isCanceled {
 				log.Debugf("Closure is cancelled, skipping publish")
 				return nil
-			} else if timeRangeStatus != oldTimeRangeStatus && closureStatus != closures.ClosureStatusCanceled {
+			} else if timeRangeStatus != oldTimeRangeStatus && !isCanceled {
 				switch timeRangeStatus {
 				case closures.TimeRangeStatusActive:
 					messages = append(messages, fmt.Sprintf("Closure for %s - %s has started.\n%s",
@@ -87,7 +88,7 @@ func handler(ctx context.Context, e events.DynamoDBEvent) error {
 					messages = append(messages, fmt.Sprintf("Closure for %s - %s has ended.\n%s",
 						date, rawTimeRange, closures.SiteURL))
 				}
-			} else if rawTimeRange != oldRawTimeRange && closureStatus != closures.ClosureStatusCanceled {
+			} else if rawTimeRange != oldRawTimeRange && !isCanceled {
 				messages = append(messages, fmt.Sprintf("Time window for the %s - %s closure has changed to %s.\n%s",
 					date, oldRawTimeRange, rawTimeRange, closures.SiteURL))
 			} else if closureStatus != oldClosureStatus {

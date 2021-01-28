@@ -199,3 +199,9 @@ func scrapeClosuresSite() (*doc, error) {
 
 	return (*doc)(document), nil
 }
+
+// IsCanceled checks if a closure status is 'Status Canceled', forgiving for alternate spellings
+// and capitilization differences.
+func IsCanceled(status ClosureStatus) bool {
+	return strings.Contains(strings.ToLower(string(status)), "cancel")
+}
