@@ -1,3 +1,10 @@
+## [1.2.10](https://github.com/nickshine/boca-chica-bot/compare/v1.2.9...v1.2.10) (2021-01-28)
+
+
+### Bug Fixes
+
+* allow for misspelled closure statuses ([ffee5e1](https://github.com/nickshine/boca-chica-bot/commit/ffee5e1d3cac398f37cc008925f73a8a038ddb9e))
+
 ## [1.2.9](https://github.com/nickshine/boca-chica-bot/compare/v1.2.8...v1.2.9) (2021-01-26)
 
 
