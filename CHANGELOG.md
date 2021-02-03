@@ -1,3 +1,10 @@
+## [1.2.11](https://github.com/nickshine/boca-chica-bot/compare/v1.2.10...v1.2.11) (2021-02-03)
+
+
+### Bug Fixes
+
+* more lenient time range parsing ([863b55b](https://github.com/nickshine/boca-chica-bot/commit/863b55b5b57a223b0b8af47e234d88a925a1c6b1))
+
 ## [1.2.10](https://github.com/nickshine/boca-chica-bot/compare/v1.2.9...v1.2.10) (2021-01-28)
 
 
