@@ -50,6 +50,7 @@ const (
 const (
 	closureLocation = "America/Chicago"
 	timeLayout      = "3:04 pm"
+	timeLayoutAlt   = "Jan 2 - 3:04 pm"
 )
 
 // Get pulls the current beach/road closures from https://www.cameroncounty.us/spacex/.
@@ -172,7 +173,15 @@ func parseTimeRange(timeRange string) (*time.Time, *time.Time, error) {
 
 	end, err := time.Parse(timeLayout, strings.TrimSpace(times[1]))
 	if err != nil {
-		return nil, nil, err
+		// try alternate timeLayout
+		end, err = time.Parse(timeLayoutAlt, strings.TrimSpace(times[1]))
+		// fallback to midnight
+		if err != nil {
+			end, err = time.Parse(timeLayout, "11:59 pm")
+			if err != nil {
+				return &start, nil, err
+			}
+		}
 	}
 
 	return &start, &end, nil

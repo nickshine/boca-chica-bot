@@ -21,6 +21,11 @@ func newTime(t string) *time.Time {
 	return &o
 }
 
+func newTimeAlt(t string) *time.Time {
+	o, _ := time.Parse(timeLayoutAlt, t)
+	return &o
+}
+
 func TestGet(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
@@ -95,10 +100,11 @@ func TestParseTimeRange(t *testing.T) {
 	}{
 		{"valid range", "9:00 am to 9:00 pm", newTime("9:00 am"), newTime("9:00 pm"), assert.NoError},
 		{"valid range 2", "8:00 am to 5:00 pm", newTime("8:00 am"), newTime("5:00 pm"), assert.NoError},
+		{"valid range 3", "8:00 am to Feb 3 - 1:00 pm", newTime("8:00 am"), newTimeAlt("Feb 3 - 1:00 pm"), assert.NoError},
 		{"invalid range", "8:00 am to to 5:00 pm", nil, nil, assert.Error},
 		{"invalid range 2", "faketime to faketime", nil, nil, assert.Error},
-		{"invalid range 3", "8:00 am to faketime", nil, nil, assert.Error},
-		{"invalid range 3", "", nil, nil, assert.Error},
+		{"invalid range 3", "8:00 am to faketime", newTime("8:00 am"), newTime("11:59 pm"), assert.NoError},
+		{"invalid range 4", "", nil, nil, assert.Error},
 	}
 
 	for _, tt := range tests {
