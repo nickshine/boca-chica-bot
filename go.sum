@@ -8,8 +8,8 @@ github.com/aws/aws-lambda-go v1.22.0 h1:X7BKqIdfoJcbsEIi+Lrt5YjX1HnZexIbNWOQgkYK
 github.com/aws/aws-lambda-go v1.22.0/go.mod h1:jJmlefzPfGnckuHdXX7/80O3BvUUi12XOkbv4w9SGLU=
 github.com/aws/aws-sdk-go v1.37.13 h1:7w1gJHJdpMfv+JbedCeOkQrYu46k0j01ULpv7oLfb3U=
 github.com/aws/aws-sdk-go v1.37.13/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
-github.com/bwmarrin/discordgo v0.23.1 h1:xlK4/69bpl/VSoCYaKe3BOc9j1HkNopoRdCppRYu8dk=
-github.com/bwmarrin/discordgo v0.23.1/go.mod h1:c1WtWUGN6nREDmzIpyTp/iD3VYt4Fpx+bVyfBG7JE+M=
+github.com/bwmarrin/discordgo v0.23.2 h1:BzrtTktixGHIu9Tt7dEE6diysEF9HWnXeHuoJEt2fH4=
+github.com/bwmarrin/discordgo v0.23.2/go.mod h1:c1WtWUGN6nREDmzIpyTp/iD3VYt4Fpx+bVyfBG7JE+M=
 github.com/cenkalti/backoff v2.1.1+incompatible/go.mod h1:90ReRw6GdpyfrHakVjL/QHaoyV4aDUVVkXQJJJ3NXXM=
 github.com/cenkalti/backoff v2.2.1+incompatible h1:tNowT99t7UNflLxfYYSlKYsBpXdEet03Pg2g16Swow4=
 github.com/cenkalti/backoff v2.2.1+incompatible/go.mod h1:90ReRw6GdpyfrHakVjL/QHaoyV4aDUVVkXQJJJ3NXXM=
