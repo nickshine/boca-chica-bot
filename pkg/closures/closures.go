@@ -116,6 +116,10 @@ func (d *doc) getClosures() ([]*Closure, error) {
 		// reset dateString to formated 'Monday, Jan 2, 2006' for primary key consistency
 		dateString = date.Format(DateLayout)
 		rawTimeRange := strings.TrimSpace(cells.Get(2).FirstChild.Data)
+		// try to sanitize/consolidate a bit time range variations a bit
+		rawTimeRange = strings.ReplaceAll(rawTimeRange, ".", "")
+		rawTimeRange = strings.ToLower(rawTimeRange)
+
 		startTime, endTime, err := parseTimeRange(rawTimeRange)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse time range: %s", err)
