@@ -89,7 +89,12 @@ func (d *doc) getClosures() ([]*Closure, error) {
 			return nil, fmt.Errorf("table format changed: row does not have 4 cells: cell count: %d", cells.Length())
 		}
 
-		closureType := ClosureType(strings.TrimSpace(cells.Get(0).FirstChild.Data))
+		closureTypeCell := cells.Get(0).FirstChild
+		if closureTypeCell == nil {
+			// row is malformed, skip
+			continue
+		}
+		closureType := ClosureType(strings.TrimSpace(closureTypeCell.Data))
 		dateString := strings.TrimSpace(cells.Get(1).FirstChild.Data)
 		var date time.Time
 		date, err = time.Parse(DateLayout, dateString)
@@ -116,7 +121,7 @@ func (d *doc) getClosures() ([]*Closure, error) {
 		// reset dateString to formated 'Monday, Jan 2, 2006' for primary key consistency
 		dateString = date.Format(DateLayout)
 		rawTimeRange := strings.TrimSpace(cells.Get(2).FirstChild.Data)
-		// try to sanitize/consolidate a bit time range variations a bit
+		// try to sanitize/consolidate time range variations a bit
 		rawTimeRange = strings.ReplaceAll(rawTimeRange, ".", "")
 		rawTimeRange = strings.ToLower(rawTimeRange)
 
@@ -170,12 +175,12 @@ func parseTimeRange(timeRange string) (*time.Time, *time.Time, error) {
 		return nil, nil, fmt.Errorf("date range format has changed from '9:00am to 9:00pm' to %s", timeRange)
 	}
 
-	start, err := time.Parse(timeLayout, strings.TrimSpace(times[0]))
+	start, err := time.Parse(timeLayout, strings.Trim(strings.TrimSpace(times[0]), "."))
 	if err != nil {
 		return nil, nil, err
 	}
 
-	end, err := time.Parse(timeLayout, strings.TrimSpace(times[1]))
+	end, err := time.Parse(timeLayout, strings.Trim(strings.TrimSpace(times[1]), "."))
 	if err != nil {
 		// try alternate timeLayout
 		end, err = time.Parse(timeLayoutAlt, strings.TrimSpace(times[1]))
