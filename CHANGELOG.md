@@ -1,3 +1,10 @@
+## [1.2.12](https://github.com/nickshine/boca-chica-bot/compare/v1.2.11...v1.2.12) (2021-05-21)
+
+
+### Bug Fixes
+
+* ignore rempty rows ([7f76938](https://github.com/nickshine/boca-chica-bot/commit/7f769386b9ff4b67363ac877579a64ca3f8f1af8))
+
 ## [1.2.11](https://github.com/nickshine/boca-chica-bot/compare/v1.2.10...v1.2.11) (2021-02-03)
 
 
