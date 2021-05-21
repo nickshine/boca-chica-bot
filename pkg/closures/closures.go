@@ -84,9 +84,9 @@ func (d *doc) getClosures() ([]*Closure, error) {
 			Nodes: []*html.Node{row},
 		}
 
-		cells := sel.Find("td")
+		cells := sel.Find("td span")
 		if cells.Length() != 4 {
-			return nil, fmt.Errorf("table format changed: row does not have 4 cells: cell count: %d", cells.Length())
+			continue
 		}
 
 		closureTypeCell := cells.Get(0).FirstChild
