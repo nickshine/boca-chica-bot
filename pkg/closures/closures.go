@@ -76,6 +76,8 @@ func (d *doc) getClosures() ([]*Closure, error) {
 		return nil, err
 	}
 
+	fmt.Println(location)
+
 	rows := d.Find("table tbody > tr") // no .Each function callback in order to return errors
 
 	for _, row := range rows.Nodes {
@@ -84,18 +86,26 @@ func (d *doc) getClosures() ([]*Closure, error) {
 			Nodes: []*html.Node{row},
 		}
 
-		cells := sel.Find("td span")
+		cells := sel.Find("td")
 		if cells.Length() != 4 {
 			continue
 		}
 
-		closureTypeCell := cells.Get(0).FirstChild
-		if closureTypeCell == nil {
+		cellData := cells.Map(func(i int, c *goquery.Selection) string {
+			return c.Text()
+		})
+
+		rawClosureType := cellData[0]
+		rawDateString := cellData[1]
+		rawTimeRangeString := cellData[2]
+		rawClosureStatus := cellData[3]
+
+		if rawClosureType == "" {
 			// row is malformed, skip
 			continue
 		}
-		closureType := ClosureType(strings.TrimSpace(closureTypeCell.Data))
-		dateString := strings.TrimSpace(cells.Get(1).FirstChild.Data)
+		closureType := ClosureType(strings.TrimSpace(rawClosureType))
+		dateString := strings.TrimSpace(rawDateString)
 		var date time.Time
 		date, err = time.Parse(DateLayout, dateString)
 		if err != nil {
@@ -120,7 +130,7 @@ func (d *doc) getClosures() ([]*Closure, error) {
 
 		// reset dateString to formated 'Monday, Jan 2, 2006' for primary key consistency
 		dateString = date.Format(DateLayout)
-		rawTimeRange := strings.TrimSpace(cells.Get(2).FirstChild.Data)
+		rawTimeRange := strings.TrimSpace(rawTimeRangeString)
 		// try to sanitize/consolidate time range variations a bit
 		rawTimeRange = strings.ReplaceAll(rawTimeRange, ".", "")
 		rawTimeRange = strings.ToLower(rawTimeRange)
@@ -133,7 +143,7 @@ func (d *doc) getClosures() ([]*Closure, error) {
 		startDate := time.Date(date.Year(), date.Month(), date.Day(), startTime.Hour(), startTime.Minute(), 0, 0, location)
 		endDate := time.Date(date.Year(), date.Month(), date.Day(), endTime.Hour(), endTime.Minute(), 0, 0, location)
 
-		closureStatus := ClosureStatus(strings.TrimSpace(cells.Get(3).FirstChild.Data))
+		closureStatus := ClosureStatus(strings.TrimSpace(rawClosureStatus))
 
 		zone, _ := startDate.Zone()
 		rawTimeRangeWithZone := fmt.Sprintf("%s (%s)", rawTimeRange, zone)
