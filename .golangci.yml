@@ -7,9 +7,8 @@ linters:
     - gofumpt
     - golint
     - gocyclo
-    - interfacer
     - lll
-    - maligned
+    - govet
     - misspell
     - nakedret
     - unparam
