@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/araddon/dateparse"
 	"golang.org/x/net/html"
 )
 
@@ -43,6 +44,9 @@ const (
 	// DateLayoutAlt represents an alternative date layout sometimes used on the site.
 	DateLayoutAlt = "Monday, January 2, 2006"
 
+	// DateLayoutAlt2 represents an alternative date layout sometimes used on the site.
+	DateLayoutAlt2 = "January 2, 2006"
+
 	// DateLayoutSimple is a date layout without the weekday.
 	DateLayoutSimple = "Jan 2, 2006"
 )
@@ -76,8 +80,6 @@ func (d *doc) getClosures() ([]*Closure, error) {
 		return nil, err
 	}
 
-	fmt.Println(location)
-
 	rows := d.Find("table tbody > tr") // no .Each function callback in order to return errors
 
 	for _, row := range rows.Nodes {
@@ -107,24 +109,20 @@ func (d *doc) getClosures() ([]*Closure, error) {
 		closureType := ClosureType(strings.TrimSpace(rawClosureType))
 		dateString := strings.TrimSpace(rawDateString)
 		var date time.Time
-		date, err = time.Parse(DateLayout, dateString)
+		date, err = dateparse.ParseAny(dateString)
 		if err != nil {
-			// try alternative layout
-			date, err = time.Parse(DateLayoutAlt, dateString)
-			if err != nil {
-				// try handling misspelled weekday
-				parts := strings.Split(dateString, ",")
-				if len(parts) == 3 {
-					dateString = strings.TrimSpace(strings.Join(parts[1:], ","))
-					date, err = time.Parse(DateLayoutSimple, dateString)
-					if err != nil {
-						// skip malformed closure
-						continue
-					}
-				} else {
+			// try handling misspelled weekday
+			parts := strings.Split(dateString, ",")
+			if len(parts) == 3 {
+				dateString = strings.TrimSpace(strings.Join(parts[1:], ","))
+				date, err = dateparse.ParseAny(dateString)
+				if err != nil {
 					// skip malformed closure
 					continue
 				}
+			} else {
+				// skip malformed closure
+				continue
 			}
 		}
 
