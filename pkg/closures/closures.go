@@ -40,15 +40,6 @@ const (
 
 	// DateLayout represents the current date layout posted for each Closure.
 	DateLayout = "Monday, Jan 2, 2006"
-
-	// DateLayoutAlt represents an alternative date layout sometimes used on the site.
-	DateLayoutAlt = "Monday, January 2, 2006"
-
-	// DateLayoutAlt2 represents an alternative date layout sometimes used on the site.
-	DateLayoutAlt2 = "January 2, 2006"
-
-	// DateLayoutSimple is a date layout without the weekday.
-	DateLayoutSimple = "Jan 2, 2006"
 )
 
 const (
