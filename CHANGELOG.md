@@ -1,3 +1,10 @@
+## [1.2.13](https://github.com/nickshine/boca-chica-bot/compare/v1.2.12...v1.2.13) (2021-06-25)
+
+
+### Bug Fixes
+
+* parse any date ([82e0ce2](https://github.com/nickshine/boca-chica-bot/commit/82e0ce2b39996a76bcc0344438912283f0f62c91))
+
 ## [1.2.12](https://github.com/nickshine/boca-chica-bot/compare/v1.2.11...v1.2.12) (2021-05-21)
 
 
