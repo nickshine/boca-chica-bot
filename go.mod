@@ -6,7 +6,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.7.1
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/aws/aws-lambda-go v1.26.0
-	github.com/aws/aws-sdk-go v1.40.48
+	github.com/aws/aws-sdk-go v1.42.20
 	github.com/bwmarrin/discordgo v0.23.2
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/dghubble/go-twitter v0.0.0-20201011215211-4b180d0cc78d
