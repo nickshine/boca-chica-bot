@@ -11,7 +11,7 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/dghubble/go-twitter v0.0.0-20201011215211-4b180d0cc78d
 	github.com/dghubble/oauth1 v0.7.0
-	github.com/jarcoal/httpmock v1.0.8
+	github.com/jarcoal/httpmock v1.1.0
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/zap v1.19.1
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
