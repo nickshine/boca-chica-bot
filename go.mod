@@ -13,7 +13,7 @@ require (
 	github.com/dghubble/oauth1 v0.7.0
 	github.com/jarcoal/httpmock v1.0.8
 	github.com/stretchr/testify v1.7.0
-	go.uber.org/zap v1.19.1
+	go.uber.org/zap v1.21.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
 	golang.org/x/net v0.0.0-20210614182718-04defd469f4e
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
