@@ -107,7 +107,7 @@ make run
 [aws lambda]:https://aws.amazon.com/lambda/
 [aws-param-store]:https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html
 [aws-sdk-go]:https://docs.aws.amazon.com/sdk-for-go/
-[cameron-county-spacex]:https://www.cameroncounty.us/spacex/
+[cameron-county-spacex]:https://www.cameroncounty.gov/spacex/
 [codecov-badge]:https://codecov.io/gh/nickshine/boca-chica-bot/branch/master/graph/badge.svg?token=171LQ10HAP
 [discord-disable-send-messages]:https://support.discord.com/hc/en-us/articles/206029707-How-do-I-set-up-Permissions-
 [discord-invite-badge]:https://img.shields.io/static/v1?label=Discord&logo=Discord&message=Invite%20@BocaChicaBot&colorB=7289DA
