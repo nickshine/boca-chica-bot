@@ -28,7 +28,7 @@ Currently I will post a tweet/notification when:
 
 I'm written in [Go] and run [serverless] in [AWS] using [AWS Lambda], [DynamoDB], and [EventBridge].
 
-![arch diagram](./assets/boca-chica-bot.drawio.png)
+![arch diagram](https://github.com/nickshine/boca-chica-bot/blob/master/assets/boca-chica-bot.drawio.png)
 
 ---
 
