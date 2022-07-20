@@ -25,7 +25,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v2
       - name: Setup Semantic-Release
-        run: npm i -D @semantic-release/changelog @semantic-release/exec @semantic-release/git semantic-release@17
+        run: npm i -D @semantic-release/changelog @semantic-release/exec @semantic-release/git semantic-release
       - name: Get Release Version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
