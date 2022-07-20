@@ -15,7 +15,7 @@ import (
 
 const (
 	// SiteURL is the website publishing the Boca Chica Beach and Road closures.
-	SiteURL = "https://www.cameroncounty.us/spacex/"
+	SiteURL = "https://www.cameroncounty.gov/spacex/"
 
 	// ClosureTypePrimary represents a primary closure.
 	ClosureTypePrimary ClosureType = "Primary Date"
@@ -48,7 +48,7 @@ const (
 	timeLayoutAlt   = "Jan 2 - 3:04 pm"
 )
 
-// Get pulls the current beach/road closures from https://www.cameroncounty.us/spacex/.
+// Get pulls the current beach/road closures from https://www.cameroncounty.gov/spacex/.
 func Get() ([]*Closure, error) {
 	document, err := scrapeClosuresSite()
 	if err != nil {
