@@ -2,7 +2,7 @@ package closures
 
 import (
 	"errors"
-	"io/ioutil"
+	"os"
 	"testing"
 	"time"
 
@@ -13,7 +13,7 @@ import (
 var mockSite []byte
 
 func init() {
-	mockSite, _ = ioutil.ReadFile("./testdata/closures.html")
+	mockSite, _ = os.ReadFile("./testdata/closures.html")
 }
 
 func newTime(t string) *time.Time {
