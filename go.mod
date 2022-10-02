@@ -5,13 +5,13 @@ go 1.19
 require (
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
-	github.com/aws/aws-lambda-go v1.26.0
+	github.com/aws/aws-lambda-go v1.34.1
 	github.com/aws/aws-sdk-go v1.40.48
 	github.com/bwmarrin/discordgo v0.23.2
 	github.com/dghubble/go-twitter v0.0.0-20201011215211-4b180d0cc78d
 	github.com/dghubble/oauth1 v0.7.0
 	github.com/jarcoal/httpmock v1.2.0
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.2
 	go.uber.org/zap v1.19.1
 	golang.org/x/net v0.0.0-20210916014120-12bc252f5db8
 )
@@ -31,5 +31,5 @@ require (
 	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
