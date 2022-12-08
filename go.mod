@@ -9,9 +9,9 @@ require (
 	github.com/aws/aws-sdk-go v1.44.109
 	github.com/bwmarrin/discordgo v0.23.2
 	github.com/dghubble/go-twitter v0.0.0-20201011215211-4b180d0cc78d
-	github.com/dghubble/oauth1 v0.7.0
+	github.com/dghubble/oauth1 v0.7.2
 	github.com/jarcoal/httpmock v1.2.0
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	go.uber.org/zap v1.23.0
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd
 )
