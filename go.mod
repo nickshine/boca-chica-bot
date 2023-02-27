@@ -11,7 +11,7 @@ require (
 	github.com/dghubble/go-twitter v0.0.0-20201011215211-4b180d0cc78d
 	github.com/dghubble/oauth1 v0.7.0
 	github.com/jarcoal/httpmock v1.2.0
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.2
 	go.uber.org/zap v1.23.0
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd
 )
